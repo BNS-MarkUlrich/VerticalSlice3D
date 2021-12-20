@@ -9,7 +9,7 @@ public class InputParse : MonoBehaviour
     private FPControl.PlayerInputActions _inputControls;
     [SerializeField] private Walking _sWalking;
     //[SerializeField] private Looking _sLooking;
-    //[SerializeField] private Jumping _sJumping;
+    [SerializeField] private Jumping _sJumping;
     //[SerializeField] private Grab _sGrab;
     //[SerializeField] private RotateMode _sRotateMode;
     //[SerializeField] private ResetClone _sResetClone;
@@ -21,8 +21,9 @@ public class InputParse : MonoBehaviour
         _controls = new FPControl();
         _inputControls = _controls.PlayerInput;
         _sWalking = this.gameObject.GetComponent<Walking>();
+        _sJumping = this.gameObject.GetComponent<Jumping>();
 
-        //_inputControls.//.performed += _sJumping.//;
+        _inputControls.Jumping.performed += _sJumping.Jump;
         //_inputControls.//.performed += _sGrab.//;
         //_inputControls.//.performed += _sRotateMode.//;
         //_inputControls.//.performed += _sResetClonde.//;
