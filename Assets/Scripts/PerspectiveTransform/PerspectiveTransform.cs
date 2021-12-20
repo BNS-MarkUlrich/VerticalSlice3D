@@ -5,25 +5,22 @@ using UnityEngine.InputSystem;
 
 public class PerspectiveTransform : MonoBehaviour
 {
+    // Remove [SerializeField] later
     [Header("Selected Object")]
     public GameObject selectedObject;
-    private Vector3 originalPosition;
-    private Vector3 originalScale;
+    [SerializeField] private Vector3 originalPosition;
+    [SerializeField] private Vector3 originalScale;
 
     [Header("Mouse Position")]
-    private Vector3 mousePositionWorld;
+    [SerializeField] private Vector3 mousePositionWorld;
 
     [Header("Scale & Distance")]
-    private float newDistance;
-    private float originalDistance;
-    private float scaleModifier;
+    [SerializeField] private float newDistance;
+    [SerializeField] private float originalDistance;
+    [SerializeField] private float scaleModifier;
 
-    /*private void Start()
-    {
-        originalPosition = selectedObject.transform.position;
-        originalScale = selectedObject.transform.localScale;
-        originalDistance = Vector3.Distance(this.gameObject.transform.position, originalPosition);
-    }*/
+    [Header("States")]
+    [SerializeField] private States currentState = States.SelectionState;
 
     private void Update()
     {
@@ -33,38 +30,46 @@ public class PerspectiveTransform : MonoBehaviour
         if (Physics.Raycast(ray, out hitData, 1000) && hitData.transform.tag != "Selectable")
         {
             mousePositionWorld = hitData.point;
-            //distance = Vector3.Distance(this.gameObject.transform.position, mousePositionWorld);
-            newDistance = Vector3.Distance(this.gameObject.transform.position, mousePositionWorld);
         }
-        scaleModifier = newDistance / originalDistance;
+        newDistance = Vector3.Distance(this.gameObject.transform.position, mousePositionWorld);
 
-        SetSelectedGameObject(true);
-    }
-
-    public void PerspectiveTransformScale()
-    {
-        selectedObject.transform.position = mousePositionWorld;
-        selectedObject.transform.localScale = originalScale * scaleModifier;
-    }
-
-    public void InitialiseSelectedObject()
-    {
-        originalPosition = selectedObject.transform.position;
-        originalScale = selectedObject.transform.localScale;
-        originalDistance = Vector3.Distance(this.gameObject.transform.position, originalPosition);
-    }
-
-    public void SetSelectedGameObject(bool selected)
-    {
-        if (selected == true && selectedObject != null)
+        switch (currentState)
         {
-            //InvokeRepeating("PerspectiveTransformScale", 0, 0);
-            PerspectiveTransformScale();
-            Invoke("InitialiseSelectedObject", 0);
+            case States.SelectionState:
+                // Call Selection/Pickup System here???
+                scaleModifier = 1;
+                if (Input.GetMouseButtonDown(0) && hitData.transform.tag == "Selectable") // Must select object to begin. Remove once pickup system is done
+                {
+                    selectedObject = hitData.transform.gameObject; // Remove once pickup system is done
+                    currentState = States.InitialiseState;
+                }
+                break;
+            case States.InitialiseState:
+                // Initialise Begin
+                originalPosition = selectedObject.transform.position;
+                originalScale = selectedObject.transform.localScale;
+                originalDistance = Vector3.Distance(this.gameObject.transform.position, originalPosition);
+                // Initialise End
+                currentState = States.GrabbedState;
+                break;
+            case States.GrabbedState:
+                scaleModifier = newDistance / originalDistance;
+                selectedObject.transform.position = mousePositionWorld;
+                selectedObject.transform.localScale = originalScale * scaleModifier;
+                if (Input.GetMouseButtonDown(0)) // Remove once pickup system is done
+                {
+                    currentState = States.SelectionState;
+                }
+                break;
+            default:
+                break;
         }
-        else
-        {
-            CancelInvoke();
-        }
+    }
+
+    public enum States
+    {
+        SelectionState,
+        InitialiseState,
+        GrabbedState
     }
 }
