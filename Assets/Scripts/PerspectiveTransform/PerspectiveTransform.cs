@@ -22,13 +22,15 @@ public class PerspectiveTransform : MonoBehaviour
     [Header("States")]
     [SerializeField] private States currentState = States.SelectionState;
 
-    private void Update()
+    private void LateUpdate()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hitData;
+        LayerMask mask = LayerMask.GetMask("Default");
 
-        if (Physics.Raycast(ray, out hitData, 1000) && hitData.transform.tag != "Selectable")
+        if (Physics.Raycast(ray, out hitData, 1000, mask) && hitData.transform.tag != "Selectable")
         {
+            // Perform 2nd raycast that ignores selected object to prevent raycast waiting to update mouseposition until outside selectedObject collider??
             mousePositionWorld = hitData.point;
         }
         newDistance = Vector3.Distance(this.gameObject.transform.position, mousePositionWorld);
@@ -38,10 +40,13 @@ public class PerspectiveTransform : MonoBehaviour
             case States.SelectionState:
                 // Call Selection/Pickup System here???
                 scaleModifier = 1;
-                if (Input.GetMouseButtonDown(0) && hitData.transform.tag == "Selectable") // Must select object to begin. Remove once pickup system is done
+                if (Input.GetMouseButtonDown(0)) // Must select object to begin. Remove once pickup system is done
                 {
-                    selectedObject = hitData.transform.gameObject; // Remove once pickup system is done
-                    currentState = States.InitialiseState;
+                    if (Physics.Raycast(ray, out hitData, 1000) && hitData.transform.tag == "Selectable")
+                    {
+                        selectedObject = hitData.transform.gameObject; // Remove once pickup system is done
+                        currentState = States.InitialiseState;
+                    }
                 }
                 break;
             case States.InitialiseState:
