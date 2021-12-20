@@ -7,9 +7,12 @@ public class PerspectiveTransform : MonoBehaviour
 {
     // Remove [SerializeField] later
     [Header("Selected Object")]
-    public GameObject selectedObject;
+    [SerializeField] public GameObject selectedObject;
     [SerializeField] private Vector3 originalPosition;
     [SerializeField] private Vector3 originalScale;
+
+    [SerializeField] private Rigidbody selectedObjectRigidBody;
+    [SerializeField] private SpringJoint selectedObjectSprintJoint;
 
     [Header("Mouse Position")]
     [SerializeField] private Vector3 mousePositionWorld;
@@ -22,7 +25,7 @@ public class PerspectiveTransform : MonoBehaviour
     [Header("States")]
     [SerializeField] private States currentState = States.SelectionState;
 
-    private void LateUpdate()
+    private void Update()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hitData;
@@ -30,7 +33,6 @@ public class PerspectiveTransform : MonoBehaviour
 
         if (Physics.Raycast(ray, out hitData, 1000, mask) && hitData.transform.tag != "Selectable")
         {
-            // Perform 2nd raycast that ignores selected object to prevent raycast waiting to update mouseposition until outside selectedObject collider??
             mousePositionWorld = hitData.point;
         }
         newDistance = Vector3.Distance(this.gameObject.transform.position, mousePositionWorld);
@@ -40,11 +42,13 @@ public class PerspectiveTransform : MonoBehaviour
             case States.SelectionState:
                 // Call Selection/Pickup System here???
                 scaleModifier = 1;
+                //selectedObjectRigidBody.useGravity = true;
                 if (Input.GetMouseButtonDown(0)) // Must select object to begin. Remove once pickup system is done
                 {
                     if (Physics.Raycast(ray, out hitData, 1000) && hitData.transform.tag == "Selectable")
                     {
                         selectedObject = hitData.transform.gameObject; // Remove once pickup system is done
+                        selectedObjectRigidBody = selectedObject.GetComponent<Rigidbody>();
                         currentState = States.InitialiseState;
                     }
                 }
@@ -59,10 +63,17 @@ public class PerspectiveTransform : MonoBehaviour
                 break;
             case States.GrabbedState:
                 scaleModifier = newDistance / originalDistance;
-                selectedObject.transform.position = mousePositionWorld;
-                selectedObject.transform.localScale = originalScale * scaleModifier;
+                //selectedObject.transform.position = mousePositionWorld;
+                //selectedObjectRigidBody.position = mousePositionWorld;
+                //float mousePositionWorldY = mousePositionWorld.y + originalScale.y * scaleModifier / 2;
+                //mousePositionWorld = new Vector3(mousePositionWorld.x, mousePositionWorldY, mousePositionWorld.z);
+                //selectedObjectRigidBody.GetComponentInChildren<SpringJoint>().gameObject.transform.position = mousePositionWorld;
+                selectedObjectRigidBody.position = mousePositionWorld;
+                selectedObjectRigidBody.useGravity = false;
+                selectedObjectRigidBody.transform.localScale = originalScale * scaleModifier;
                 if (Input.GetMouseButtonDown(0)) // Remove once pickup system is done
                 {
+                    selectedObjectRigidBody.useGravity = true;
                     currentState = States.SelectionState;
                 }
                 break;
@@ -71,7 +82,7 @@ public class PerspectiveTransform : MonoBehaviour
         }
     }
 
-    public enum States
+    private enum States
     {
         SelectionState,
         InitialiseState,
