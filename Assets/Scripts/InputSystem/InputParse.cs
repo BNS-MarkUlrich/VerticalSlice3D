@@ -7,9 +7,9 @@ public class InputParse : MonoBehaviour
 {
     private FPControl _controls;
     private FPControl.PlayerInputActions _inputControls;
-    //[SerializeField] private Movement _sMovement;
-    //[SerializeField] private Looking _sLooking;
-    //[SerializeField] private Jumping _sJumping;
+    [SerializeField] private Walking _sWalking;
+    [SerializeField] private CameraMoving _sLooking;
+    [SerializeField] private Jumping _sJumping;
     //[SerializeField] private Grab _sGrab;
     //[SerializeField] private RotateMode _sRotateMode;
     //[SerializeField] private ResetClone _sResetClone;
@@ -20,10 +20,11 @@ public class InputParse : MonoBehaviour
     {
         _controls = new FPControl();
         _inputControls = _controls.PlayerInput;
-        
-        //_inputControls.//.performed += _sMovement.//;
-        //_inputControls.//.performed += _sLooking.//;
-        //_inputControls.//.performed += _sJumping.//;
+        _sWalking = this.gameObject.GetComponent<Walking>();
+        _sJumping = this.gameObject.GetComponent<Jumping>();
+        _sLooking = this.gameObject.GetComponentInChildren<CameraMoving>();
+
+        _inputControls.Jumping.performed += _sJumping.Jump;
         //_inputControls.//.performed += _sGrab.//;
         //_inputControls.//.performed += _sRotateMode.//;
         //_inputControls.//.performed += _sResetClonde.//;
@@ -35,7 +36,7 @@ public class InputParse : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //_sMovement.//(_inputControls.//.ReadValue<Vector2>());
-        //_sLooking.//(_inputControls.//.ReadValue<Vector2>());
+        _sWalking.Walk(_inputControls.Movement.ReadValue<Vector2>());
+        _sLooking.Looking(_inputControls.Lookingrotating.ReadValue<Vector2>());
     }
 }
