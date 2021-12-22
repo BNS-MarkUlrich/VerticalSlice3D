@@ -5,14 +5,15 @@ TagManager:
   serializedVersion: 2
   tags:
   - NoMoveThrough
+  - Selectable
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Selectables
   - Water
   - UI
-  - 
+  - RaycastBox
   - 
   - 
   - 
