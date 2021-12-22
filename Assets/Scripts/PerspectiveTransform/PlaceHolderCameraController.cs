@@ -53,6 +53,7 @@ public class PlaceHolderCameraController : MonoBehaviour
                 y = -1;
 
             Vector3 dir = transform.right * x + transform.up * y + transform.forward * z;
+            dir.y = 0;
             transform.position += dir * spectatorMoveSpeed * Time.deltaTime;
         }
     }

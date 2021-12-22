@@ -34,7 +34,7 @@ public class PerspectiveTransform : MonoBehaviour
     {
         selectedParent = new GameObject("SelectedObject Handler"); // Pickup system
         selectedParent.AddComponent<BoxCollider>();
-        selectedParent.GetComponent<BoxCollider>().isTrigger = true;
+        selectedParent.GetComponent<Collider>().isTrigger = true;
         selectedParent.layer = 6;
         selectedParent.transform.parent = Camera.main.transform; // Pickup system
         selectedParent.transform.localPosition = new Vector3(0, 0, 0); // Pickup system
@@ -51,7 +51,7 @@ public class PerspectiveTransform : MonoBehaviour
         if (Physics.Raycast(ray, out hitData, 1000) && hitData.transform.tag == "Selectable")
         {
             Vector3 mouseLocalPoint = Vector3.MoveTowards(transform.position, transform.position + transform.forward * hitData.distance, hitData.distance);
-            mouseWorldPoint = new Vector3(hitData.point.x, hitData.point.y, mouseLocalPoint.z);
+            mouseWorldPoint = new Vector3(hitData.point.x, hitData.point.y, hitData.point.z);
             Debug.DrawLine(this.gameObject.transform.position, hitData.point, Color.red);
             
         }
@@ -60,7 +60,7 @@ public class PerspectiveTransform : MonoBehaviour
         switch (currentState)
         {
             case States.SelectionState:
-                scaleModifier = 1;
+                //scaleModifier = 0;
                 if (Input.GetMouseButtonDown(0)) // Must select object to begin. Pickup system
                 {
                     if (Physics.Raycast(ray, out hitData, 1000, mask) && hitData.transform.tag == "Selectable")
@@ -77,9 +77,10 @@ public class PerspectiveTransform : MonoBehaviour
                 originalRotation = selectedObject.transform.worldToLocalMatrix.rotation;
                 originalScale = selectedObject.transform.localScale;
                 originalDistance = Vector3.Distance(this.gameObject.transform.position, originalPosition);
-                
+
+                selectedRigidBody.GetComponent<Collider>().isTrigger = true;
                 selectedRigidBody.isKinematic = true;
-                selectedRigidBody.useGravity = true;
+                selectedRigidBody.useGravity = false;
                 selectedObject.transform.parent = selectedParent.transform;  // Pickup system
                 /// Initialise End
                 currentState = States.GrabbedState;
@@ -87,22 +88,23 @@ public class PerspectiveTransform : MonoBehaviour
             case States.GrabbedState:
                 /// Grabbed Begin
                 scaleModifier = newDistance / originalDistance;
-                selectedObject.transform.localScale = originalScale * scaleModifier;
-                selectedParent.transform.localScale = selectedObject.transform.localScale;
+                selectedParent.transform.localScale = originalScale * scaleModifier;
+                selectedObject.transform.rotation = new Quaternion(0,0,0,1); // Pickup system remove/change
                 LayerMask boxMask = LayerMask.GetMask("Default");
-                collisionDetected = Physics.BoxCast(selectedParent.GetComponent<Collider>().bounds.center, selectedParent.transform.localScale, transform.forward, out boxHit, transform.rotation = Quaternion.identity, 1000, boxMask);
+                collisionDetected = Physics.BoxCast(selectedParent.GetComponent<Collider>().bounds.center, transform.localScale, transform.forward, out boxHit, transform.rotation = Quaternion.identity, 1000, boxMask);
                 if (collisionDetected)
                 {
                     Vector3 mouseLocalPoint = Vector3.MoveTowards(transform.position, transform.position + transform.forward * boxHit.distance, boxHit.distance);
                     selectedObject.transform.position = mouseLocalPoint;
-                    selectedObject.transform.localRotation = boxHit.transform.rotation;
                 }
                 /// Grabbed End
                 if (Input.GetMouseButtonDown(0)) // Pickup system
                 {
                     collisionDetected = false;
+                    selectedRigidBody.GetComponent<Collider>().isTrigger = false;
                     selectedObject.transform.parent = transform.parent;  // Pickup system
                     selectedObject.transform.position = mouseWorldPoint;
+                    selectedObject.transform.rotation = new Quaternion(0, 0, 0, 1); // Pickup system remove/change
                     selectedRigidBody.isKinematic = false;
                     selectedRigidBody.useGravity = true;
                     currentState = States.SelectionState;
