@@ -213,7 +213,7 @@ Transform:
   m_GameObject: {fileID: 226484774}
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 24.45, y: 6, z: 0.59}
-  m_LocalScale: {x: 50, y: 12, z: 1}
+  m_LocalScale: {x: 60, y: 15, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 7
@@ -449,7 +449,7 @@ Transform:
   m_GameObject: {fileID: 521754906}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.43, y: 6, z: 25.04}
-  m_LocalScale: {x: 50, y: 12, z: 1}
+  m_LocalScale: {x: 60, y: 15, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 8
@@ -467,6 +467,7 @@ GameObject:
   - component: {fileID: 787621845}
   - component: {fileID: 787621844}
   - component: {fileID: 787621847}
+  - component: {fileID: 787621848}
   m_Layer: 3
   m_Name: Sphere
   m_TagString: Selectable
@@ -566,6 +567,18 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 3
+--- !u!114 &787621848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 787621842}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8352e67b4f22d964f94a3f21aecbe5c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &813866335
 GameObject:
   m_ObjectHideFlags: 0
@@ -656,7 +669,7 @@ Transform:
   m_GameObject: {fileID: 813866335}
   m_LocalRotation: {x: 0.5, y: 0.5, z: -0.5, w: 0.5}
   m_LocalPosition: {x: 0, y: -0.5, z: 0}
-  m_LocalScale: {x: 50, y: 50, z: 1}
+  m_LocalScale: {x: 60, y: 60, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
@@ -976,7 +989,7 @@ Transform:
   m_GameObject: {fileID: 1563345399}
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: -24.78, y: 6, z: 0.59}
-  m_LocalScale: {x: 50, y: 12, z: 1}
+  m_LocalScale: {x: 60, y: 15, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 10
@@ -1060,7 +1073,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1571017808}
   m_LocalRotation: {x: 0.12167529, y: -0, z: -0, w: 0.99257}
-  m_LocalPosition: {x: 0, y: 4.41, z: -16.76}
+  m_LocalPosition: {x: 0, y: 3, z: -16.76}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -1078,19 +1091,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21856643e499f714da838597da92d1fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  selectedObject: {fileID: 1026803824}
+  selectedObject: {fileID: 0}
   selectedRigidBody: {fileID: 0}
   selectedParent: {fileID: 0}
   originalPosition: {x: 0, y: 0, z: 0}
+  originalRotation: {x: 0, y: 0, z: 0, w: 0}
   originalScale: {x: 0, y: 0, z: 0}
   collisionDetected: 0
   mouseWorldPoint: {x: 0, y: 0, z: 0}
-  moveForce: 250
   newDistance: 0
   originalDistance: 0
   scaleModifier: 0
   currentState: 0
-  currentMode: 0
 --- !u!114 &1571017813
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1107,7 +1119,7 @@ MonoBehaviour:
   sensY: 3
   minY: -90
   maxY: 90
-  spectatorMoveSpeed: 10
+  spectatorMoveSpeed: 5
   rotX: 0
   rotY: 0
 --- !u!1 &1579866453
@@ -1200,7 +1212,7 @@ Transform:
   m_GameObject: {fileID: 1579866453}
   m_LocalRotation: {x: 0.5, y: 0.5, z: -0.5, w: 0.5}
   m_LocalPosition: {x: 0, y: 12.12, z: 0}
-  m_LocalScale: {x: 50, y: 50, z: 1}
+  m_LocalScale: {x: 60, y: 60, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
@@ -1295,7 +1307,7 @@ Transform:
   m_GameObject: {fileID: 1848387114}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.43, y: 6, z: -23.88}
-  m_LocalScale: {x: 50, y: 12, z: 1}
+  m_LocalScale: {x: 60, y: 15, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 9
