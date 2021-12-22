@@ -8,7 +8,7 @@ public class InputParse : MonoBehaviour
     private FPControl _controls;
     private FPControl.PlayerInputActions _inputControls;
     [SerializeField] private Walking _sWalking;
-    //[SerializeField] private Looking _sLooking;
+    [SerializeField] private CameraMoving _sLooking;
     [SerializeField] private Jumping _sJumping;
     //[SerializeField] private Grab _sGrab;
     //[SerializeField] private RotateMode _sRotateMode;
@@ -22,6 +22,7 @@ public class InputParse : MonoBehaviour
         _inputControls = _controls.PlayerInput;
         _sWalking = this.gameObject.GetComponent<Walking>();
         _sJumping = this.gameObject.GetComponent<Jumping>();
+        _sLooking = this.gameObject.GetComponentInChildren<CameraMoving>();
 
         _inputControls.Jumping.performed += _sJumping.Jump;
         //_inputControls.//.performed += _sGrab.//;
@@ -36,6 +37,6 @@ public class InputParse : MonoBehaviour
     void Update()
     {
         _sWalking.Walk(_inputControls.Movement.ReadValue<Vector2>());
-        //_sLooking.//(_inputControls.//.ReadValue<Vector2>());
+        _sLooking.Looking(_inputControls.Lookingrotating.ReadValue<Vector2>());
     }
 }
