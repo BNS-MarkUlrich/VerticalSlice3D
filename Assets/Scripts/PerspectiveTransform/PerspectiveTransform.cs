@@ -20,6 +20,7 @@ public class PerspectiveTransform : MonoBehaviour
     [Header("Mouse Position")]
     [SerializeField] private Vector3 mouseWorldPoint;
     [SerializeField] private RaycastHit collisionHit;
+    [SerializeField] private RaycastHit hitData;
 
     [Header("Scale & Distance")]
     [SerializeField] private float newDistance;
@@ -49,14 +50,12 @@ public class PerspectiveTransform : MonoBehaviour
     private void Update()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hitData;
-        LayerMask mask = LayerMask.GetMask("Selectables");
 
         /// Call Selection/Pickup System here
         if (Physics.Raycast(ray, out collisionHit, 1000))
         {
             Vector3 mouseLocalPoint = Vector3.MoveTowards(transform.position, transform.position + transform.forward * collisionHit.distance, collisionHit.distance);
-            mouseWorldPoint = new Vector3(collisionHit.point.x, collisionHit.point.y, collisionHit.point.z);
+            //mouseWorldPoint = new Vector3(collisionHit.point.x, collisionHit.point.y, collisionHit.point.z);
             Debug.DrawLine(this.gameObject.transform.position, collisionHit.point, Color.blue);
             
         }
@@ -97,9 +96,10 @@ public class PerspectiveTransform : MonoBehaviour
                 selectionDistance = Vector3.Distance(collisionHit.point, Camera.main.transform.position);
                 newScaleModifier = oldSelectionDistance / selectionDistance;
                 scaleModifier = newDistance / originalDistance;
-                selectedObject.transform.localScale = (originalScale * scaleModifier) * newScaleModifier;
+                selectedParent.transform.localScale = (originalScale * scaleModifier) * newScaleModifier;
                 selectedObject.transform.rotation = new Quaternion(0,0,0,1); // Pickup system remove/change
-                collisionDetected = Physics.BoxCast(selectedParent.GetComponent<Collider>().bounds.center, transform.localScale/2, transform.forward, out boxHit, transform.rotation = Quaternion.identity, newDistance);
+                mouseWorldPoint = hitData.transform.position;
+                collisionDetected = Physics.BoxCast(selectedParent.GetComponent<Collider>().bounds.center, selectedParent.transform.localScale/2, transform.forward, out boxHit, transform.rotation = Quaternion.identity, newDistance);
                 if (collisionDetected)
                 {
                     Vector3 mouseLocalPoint = Vector3.MoveTowards(transform.position, transform.position + transform.forward * boxHit.distance, boxHit.distance);
@@ -108,16 +108,21 @@ public class PerspectiveTransform : MonoBehaviour
                 /// Grabbed End
                 if (Input.GetMouseButtonDown(0)) // Pickup system
                 {
-                    collisionDetected = false;
-                    selectedRigidBody.GetComponent<Collider>().isTrigger = false;
-                    selectedObject.layer = 0;
-                    selectedObject.transform.parent = transform.parent;  // Pickup system
-                    selectedObject.transform.position = boxHit.point;
-                    selectedObject.transform.rotation = new Quaternion(0, 0, 0, 1); // Pickup system remove/change
-                    selectedRigidBody.isKinematic = false;
-                    selectedRigidBody.useGravity = true;
-                    currentState = States.SelectionState;
+                    currentState = States.DropState;
                 }
+                break;
+            case States.DropState:
+                /// Initialise Begin
+                collisionDetected = false;
+                selectedRigidBody.GetComponent<Collider>().isTrigger = false;
+                selectedObject.layer = 0;
+                selectedObject.transform.parent = transform.parent;  // Pickup system
+                selectedObject.transform.position = mouseWorldPoint;
+                selectedObject.transform.rotation = new Quaternion(0, 0, 0, 1); // Pickup system remove/change
+                selectedRigidBody.isKinematic = false;
+                selectedRigidBody.useGravity = true;
+                /// Initialise End
+                currentState = States.SelectionState;
                 break;
             default:
                 break;
@@ -136,7 +141,8 @@ public class PerspectiveTransform : MonoBehaviour
     {
         SelectionState,
         InitialiseState,
-        GrabbedState
+        GrabbedState,
+        DropState
     }
 
     //Draw the BoxCast as a gizmo to show where it currently is testing. Click the Gizmos button to see this
@@ -150,7 +156,7 @@ public class PerspectiveTransform : MonoBehaviour
             //Draw a Ray forward from GameObject toward the hit
             //Gizmos.DrawRay(transform.position, transform.forward * boxHit.distance);
             //Draw a cube that extends to where the hit exists
-            //Gizmos.DrawWireCube(transform.position + transform.forward * boxHit.distance, transform.localScale);
+            Gizmos.DrawWireCube(transform.position + transform.forward * boxHit.distance, selectedParent.transform.localScale);
         }
     }
 }
