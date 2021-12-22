@@ -12,31 +12,32 @@ public class PerspectiveTransform : MonoBehaviour
     [SerializeField] private GameObject selectedParent; // Pickup system
 
     [SerializeField] private Vector3 originalPosition;
+    [SerializeField] private Quaternion originalRotation;
     [SerializeField] private Vector3 originalScale;
-
-    [SerializeField] private Vector3 selectedParentOriginalPosition;
 
     public bool collisionDetected;
 
     [Header("Mouse Position")]
     [SerializeField] private Vector3 mouseWorldPoint;
-    [SerializeField] private float moveForce = 250;
 
     [Header("Scale & Distance")]
     [SerializeField] private float newDistance;
     [SerializeField] private float originalDistance;
-    [SerializeField] private float scaleModifier;    
+    [SerializeField] private float scaleModifier;
+
+    [SerializeField] private RaycastHit boxHit;
 
     [Header("Switch Cases")]
     [SerializeField] private States currentState = States.SelectionState;
-    [SerializeField] private ScalingModes currentMode = ScalingModes.Legacy;
 
     private void Start()
     {
         selectedParent = new GameObject("SelectedObject Handler"); // Pickup system
+        selectedParent.AddComponent<BoxCollider>();
+        selectedParent.GetComponent<BoxCollider>().isTrigger = true;
+        selectedParent.layer = 6;
         selectedParent.transform.parent = Camera.main.transform; // Pickup system
-        selectedParent.transform.localPosition = new Vector3(0, 0, 3); // Pickup system
-        selectedParentOriginalPosition = selectedParent.transform.localPosition; // Pickup system
+        selectedParent.transform.localPosition = new Vector3(0, 0, 0); // Pickup system
         selectedParent.transform.localRotation = new Quaternion(0, 0, 0, 0); // Pickup system
     }
 
@@ -44,21 +45,15 @@ public class PerspectiveTransform : MonoBehaviour
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hitData;
-        LayerMask mask = LayerMask.GetMask("Default");
+        LayerMask mask = LayerMask.GetMask("Selectables");
 
-        if (Physics.Raycast(ray, out hitData, 1000, mask) && hitData.transform.tag != "Selectable")
+        /// Call Selection/Pickup System here
+        if (Physics.Raycast(ray, out hitData, 1000) && hitData.transform.tag == "Selectable")
         {
-            mouseWorldPoint = hitData.point;
-
-            Vector3 incomingVec = hitData.point - this.gameObject.transform.position;
-            Vector3 reflectVec = Vector3.Reflect(incomingVec, -incomingVec);
+            Vector3 mouseLocalPoint = Vector3.MoveTowards(transform.position, transform.position + transform.forward * hitData.distance, hitData.distance);
+            mouseWorldPoint = new Vector3(hitData.point.x, hitData.point.y, mouseLocalPoint.z);
             Debug.DrawLine(this.gameObject.transform.position, hitData.point, Color.red);
-
-            /*RaycastHit normhit;
-            if (Physics.Raycast(hitData.point, reflectVec, out normhit))
-            {
-                Debug.DrawLine(hitData.point, normhit.point, Color.green);
-            }*/
+            
         }
         newDistance = hitData.distance;
 
@@ -66,10 +61,9 @@ public class PerspectiveTransform : MonoBehaviour
         {
             case States.SelectionState:
                 scaleModifier = 1;
-                /// Call Selection/Pickup System here
                 if (Input.GetMouseButtonDown(0)) // Must select object to begin. Pickup system
                 {
-                    if (Physics.Raycast(ray, out hitData, 1000) && hitData.transform.tag == "Selectable")
+                    if (Physics.Raycast(ray, out hitData, 1000, mask) && hitData.transform.tag == "Selectable")
                     {
                         selectedObject = hitData.transform.gameObject; // Pickup system
                         selectedRigidBody = selectedObject.GetComponent<Rigidbody>();
@@ -80,11 +74,11 @@ public class PerspectiveTransform : MonoBehaviour
             case States.InitialiseState:
                 /// Initialise Begin
                 originalPosition = selectedObject.transform.position;
+                originalRotation = selectedObject.transform.worldToLocalMatrix.rotation;
                 originalScale = selectedObject.transform.localScale;
                 originalDistance = Vector3.Distance(this.gameObject.transform.position, originalPosition);
-
-                selectedRigidBody.freezeRotation = true; // Pickup system
-                selectedRigidBody.isKinematic = false;
+                
+                selectedRigidBody.isKinematic = true;
                 selectedRigidBody.useGravity = true;
                 selectedObject.transform.parent = selectedParent.transform;  // Pickup system
                 /// Initialise End
@@ -94,51 +88,21 @@ public class PerspectiveTransform : MonoBehaviour
                 /// Grabbed Begin
                 scaleModifier = newDistance / originalDistance;
                 selectedObject.transform.localScale = originalScale * scaleModifier;
-                if (mouseWorldPoint.y < selectedObject.transform.localScale.y / 2)
+                selectedParent.transform.localScale = selectedObject.transform.localScale;
+                LayerMask boxMask = LayerMask.GetMask("Default");
+                collisionDetected = Physics.BoxCast(selectedParent.GetComponent<Collider>().bounds.center, selectedParent.transform.localScale, transform.forward, out boxHit, transform.rotation = Quaternion.identity, 1000, boxMask);
+                if (collisionDetected)
                 {
-                    currentMode = ScalingModes.Legacy;
-                }
-                else
-                {
-                    currentMode = ScalingModes.Modern;
-                }
-                switch (currentMode)
-                {
-                    case ScalingModes.Modern:
-                        /// Option 1: (Accurate, looks like source material, doesn't follow mouse centre, jittery)
-                        /// Modern Begin
-                        selectedParent.transform.position = mouseWorldPoint;
-                        selectedObject.transform.parent = selectedParent.transform;
-                        selectedObject.transform.position = selectedParent.transform.position;
-                        Vector3 moveDirection = (selectedParent.transform.position - selectedObject.transform.position);
-                        selectedRigidBody.AddForce(moveDirection * moveForce);
-                        //selectedObject.transform.localPosition = new Vector3(0, 0, mouseWorldPoint.z - selectedObject.transform.localScale.z);
-                        selectedRigidBody.isKinematic = true;
-                        selectedRigidBody.useGravity = false;
-                        /// Modern End
-                        break;
-                    case ScalingModes.Legacy:
-                        /// Option 2: (Fast, smooth, looks clean, clipping, unstable)
-                        /// Legacy Begin
-                        selectedParent.transform.localPosition = selectedParentOriginalPosition;
-                        float holdDistance = newDistance - mouseWorldPoint.z;
-                        Vector3 newWorldPoint = new Vector3(0, 0, holdDistance);
-                        //selectedObject.transform.localPosition = newWorldPoint;
-                        //selectedObject.transform.position = mouseWorldPoint;
-                        selectedObject.transform.position = new Vector3(mouseWorldPoint.x, selectedObject.transform.localScale.y / 2, mouseWorldPoint.z);
-                        // selectedObject.transform.position = selectedParent.transform.position; // Pickup system
-                        selectedRigidBody.isKinematic = true;
-                        selectedRigidBody.useGravity = false;
-                        /// Legacy End
-                        break;
-                    default:
-                        break;
+                    Vector3 mouseLocalPoint = Vector3.MoveTowards(transform.position, transform.position + transform.forward * boxHit.distance, boxHit.distance);
+                    selectedObject.transform.position = mouseLocalPoint;
+                    selectedObject.transform.localRotation = boxHit.transform.rotation;
                 }
                 /// Grabbed End
                 if (Input.GetMouseButtonDown(0)) // Pickup system
                 {
-                    selectedRigidBody.freezeRotation = false; // Pickup system
+                    collisionDetected = false;
                     selectedObject.transform.parent = transform.parent;  // Pickup system
+                    selectedObject.transform.position = mouseWorldPoint;
                     selectedRigidBody.isKinematic = false;
                     selectedRigidBody.useGravity = true;
                     currentState = States.SelectionState;
@@ -152,7 +116,9 @@ public class PerspectiveTransform : MonoBehaviour
     private enum ScalingModes
     {
         Modern,
-        Legacy
+        Legacy,
+        NormHit,
+        NormHitFloor
     }
     
     private enum States
@@ -160,5 +126,20 @@ public class PerspectiveTransform : MonoBehaviour
         SelectionState,
         InitialiseState,
         GrabbedState
+    }
+
+    //Draw the BoxCast as a gizmo to show where it currently is testing. Click the Gizmos button to see this
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+
+        //Check if there has been a hit yet
+        if (collisionDetected)
+        {
+            //Draw a Ray forward from GameObject toward the hit
+            Gizmos.DrawRay(transform.position, transform.forward * boxHit.distance);
+            //Draw a cube that extends to where the hit exists
+            Gizmos.DrawWireCube(transform.position + transform.forward * boxHit.distance, transform.localScale);
+        }
     }
 }
