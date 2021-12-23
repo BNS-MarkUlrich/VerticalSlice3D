@@ -55,9 +55,7 @@ public class PerspectiveTransform : MonoBehaviour
             Vector3 mouseLocalPoint = Vector3.MoveTowards(transform.position, transform.position + transform.forward * collisionHit.distance, collisionHit.distance);
             //mouseWorldPoint = new Vector3(collisionHit.point.x, collisionHit.point.y, collisionHit.point.z);
             Debug.DrawLine(this.gameObject.transform.position, collisionHit.point, Color.blue);
-            
         }
-        //newDistance = Vector3.Distance(this.gameObject.transform.position, collisionHit.point);
         
 
         switch (currentState)
@@ -99,32 +97,46 @@ public class PerspectiveTransform : MonoBehaviour
                 mouseWorldPoint = hitData.transform.position;
                 collisionDetected = Physics.BoxCast(transform.position, selectedObject.transform.localScale/2, transform.forward, out boxHit, transform.rotation, collisionHit.distance); // = Quaternion.identity
                 //boxHits = Physics.BoxCastAll(selectedParent.GetComponent<Collider>().bounds.center, selectedParent.transform.localScale, transform.forward, transform.rotation = Quaternion.identity, 1000);
+                //Debug.DrawLine(this.gameObject.transform.position, transform.position + transform.forward * boxHit.distance);
+                if (Vector3.Distance(selectedRigidBody.worldCenterOfMass, transform.position + transform.forward * boxHit.distance) > 2)
+                {
+                    float ErrorDistance = Vector3.Distance(selectedRigidBody.worldCenterOfMass, transform.position + transform.forward * boxHit.distance) / 2;
+
+                    Vector3 medianPoint = (selectedRigidBody.worldCenterOfMass + transform.position + transform.forward * boxHit.distance) / 2f;
+                    Vector3 objectErrorDestination = Vector3.MoveTowards(selectedRigidBody.worldCenterOfMass, medianPoint, ErrorDistance);
+                    Vector3 boxHitDestination = Vector3.MoveTowards(transform.position + transform.forward * boxHit.distance, medianPoint, ErrorDistance);
+                    selectedObject.transform.position = objectErrorDestination;
+                    boxHit.point = boxHitDestination;
+
+
+                    Vector3 boxPoint = boxHit.point;
+                    boxPoint = new Vector3(collisionHit.point.x, collisionHit.point.y + selectedParent.transform.localScale.y / 2, collisionHit.point.z);
+                    Vector3 backWardDirection = Vector3.MoveTowards(selectedObject.transform.position, collisionHit.point, collisionHit.distance);
+                    Debug.DrawLine(selectedRigidBody.worldCenterOfMass, transform.position + transform.forward * boxHit.distance);
+                    Debug.Log("Bye");
+                }
+                else if (Vector3.Distance(Camera.main.transform.position, selectedObject.transform.position) <= 0)
+                {
+                    selectedObject.transform.position = collisionHit.point;
+                    newDistance = collisionHit.distance;
+                    scaleModifier = newDistance / originalDistance;
+                    selectedObject.transform.localScale = originalScale * scaleModifier;
+                    Debug.Log("Smoll");
+                }
+                else
+                {
+                    newDistance = Vector3.Distance(this.gameObject.transform.position, transform.position + transform.forward * boxHit.distance);
+                    scaleModifier = newDistance / originalDistance;
+                    //selectedParent.transform.localScale = originalScale * scaleModifier;
+                    selectedObject.transform.localScale = originalScale * scaleModifier;
+                    Debug.Log("Hello");
+                    Vector3 mouseLocalPoint = Vector3.MoveTowards(transform.position, transform.position + transform.forward * boxHit.distance, boxHit.distance);
+                    //selectedRigidBody.AddForce(selectedRigidBody.worldCenterOfMass * 250);
+                    selectedObject.transform.position = mouseLocalPoint;
+                }
                 if (collisionDetected)
                 {
-                    //Debug.DrawLine(this.gameObject.transform.position, transform.position + transform.forward * boxHit.distance);
-                    if (Vector3.Distance(selectedRigidBody.worldCenterOfMass, transform.position + transform.forward * boxHit.distance) > 2)
-                    {
-                        Debug.DrawLine(selectedRigidBody.worldCenterOfMass, transform.position + transform.forward * boxHit.distance);
-                        Debug.Log("Bye");
-                        Vector3 boxPoint = boxHit.point;
-                        boxPoint = new Vector3(collisionHit.point.x, collisionHit.point.y + selectedParent.transform.localScale.y / 2, collisionHit.point.z);
-                        Vector3 backWardDirection = Vector3.MoveTowards(selectedObject.transform.position, collisionHit.point, collisionHit.distance);
-                        //selectedParent.transform.localScale = selectedObject.transform.localScale;
-                        //selectedObject.transform.localScale = selectedParent.transform.localScale;
-                        //selectedObject.transform.position = transform.position + transform.forward * boxHit.distance;
-                        //selectedObject.transform.position = boxHit.point;
-                    }
-                    else
-                    {
-                        newDistance = Vector3.Distance(this.gameObject.transform.position, transform.position + transform.forward * boxHit.distance);
-                        scaleModifier = newDistance / originalDistance;
-                        //selectedParent.transform.localScale = originalScale * scaleModifier;
-                        selectedObject.transform.localScale = originalScale * scaleModifier;
-                        Debug.Log("Hello");
-                        Vector3 mouseLocalPoint = Vector3.MoveTowards(transform.position, transform.position + transform.forward * boxHit.distance, boxHit.distance);
-                        //selectedRigidBody.AddForce(selectedRigidBody.worldCenterOfMass * 250);
-                        selectedObject.transform.position = mouseLocalPoint;
-                    }
+                    
                 }
                 /// Grabbed End
                 if (Input.GetMouseButtonDown(0)) // Pickup system
