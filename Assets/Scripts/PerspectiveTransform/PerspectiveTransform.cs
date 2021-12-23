@@ -31,6 +31,8 @@ public class PerspectiveTransform : MonoBehaviour
     [SerializeField] private RaycastHit boxHit;
     [SerializeField] private RaycastHit[] boxHits;
 
+    [SerializeField] private RaycastHit sweepTestData;
+
     [Header("Switch Cases")]
     [SerializeField] private States currentState = States.SelectionState;
 
@@ -56,7 +58,7 @@ public class PerspectiveTransform : MonoBehaviour
             //mouseWorldPoint = new Vector3(collisionHit.point.x, collisionHit.point.y, collisionHit.point.z);
             Debug.DrawLine(this.gameObject.transform.position, collisionHit.point, Color.blue);
         }
-        
+
 
         switch (currentState)
         {
@@ -95,23 +97,24 @@ public class PerspectiveTransform : MonoBehaviour
                 /// Grabbed Begin
                 selectedObject.transform.rotation = new Quaternion(0,0,0,1); // Pickup system remove/change
                 mouseWorldPoint = hitData.transform.position;
-                collisionDetected = Physics.BoxCast(transform.position, selectedObject.transform.localScale/2, transform.forward, out boxHit, transform.rotation, collisionHit.distance); // = Quaternion.identity
+                Physics.BoxCast(transform.position, selectedObject.transform.localScale/2, transform.forward, out boxHit, transform.rotation, collisionHit.distance); // = Quaternion.identity
+                collisionDetected = selectedRigidBody.SweepTest(ray.direction, out sweepTestData, collisionHit.distance); // = Quaternion.identity
                 //boxHits = Physics.BoxCastAll(selectedParent.GetComponent<Collider>().bounds.center, selectedParent.transform.localScale, transform.forward, transform.rotation = Quaternion.identity, 1000);
                 //Debug.DrawLine(this.gameObject.transform.position, transform.position + transform.forward * boxHit.distance);
-                if (Vector3.Distance(selectedRigidBody.worldCenterOfMass, transform.position + transform.forward * boxHit.distance) > 2)
+                if (Vector3.Distance(selectedRigidBody.worldCenterOfMass, transform.position + transform.forward * boxHit.distance) > 1)
                 {
-                    float ErrorDistance = Vector3.Distance(selectedRigidBody.worldCenterOfMass, transform.position + transform.forward * boxHit.distance) / 2;
+                    newDistance = Vector3.Distance(this.gameObject.transform.position, transform.position + transform.forward * boxHit.distance);
+                    scaleModifier = newDistance / originalDistance;
+                    selectedObject.transform.localScale = originalScale * scaleModifier;
+
+                    float ErrorDistance = Vector3.Distance(selectedRigidBody.worldCenterOfMass, transform.position + transform.forward * sweepTestData.distance) / 2;
 
                     Vector3 medianPoint = (selectedRigidBody.worldCenterOfMass + transform.position + transform.forward * boxHit.distance) / 2f;
                     Vector3 objectErrorDestination = Vector3.MoveTowards(selectedRigidBody.worldCenterOfMass, medianPoint, ErrorDistance);
-                    Vector3 boxHitDestination = Vector3.MoveTowards(transform.position + transform.forward * boxHit.distance, medianPoint, ErrorDistance);
+                    Vector3 boxHitDestination = Vector3.MoveTowards(transform.position + transform.forward * sweepTestData.distance, medianPoint, ErrorDistance);
                     selectedObject.transform.position = objectErrorDestination;
                     boxHit.point = boxHitDestination;
 
-
-                    Vector3 boxPoint = boxHit.point;
-                    boxPoint = new Vector3(collisionHit.point.x, collisionHit.point.y + selectedParent.transform.localScale.y / 2, collisionHit.point.z);
-                    Vector3 backWardDirection = Vector3.MoveTowards(selectedObject.transform.position, collisionHit.point, collisionHit.distance);
                     Debug.DrawLine(selectedRigidBody.worldCenterOfMass, transform.position + transform.forward * boxHit.distance);
                     Debug.Log("Bye");
                 }
@@ -136,7 +139,7 @@ public class PerspectiveTransform : MonoBehaviour
                 }
                 if (collisionDetected)
                 {
-                    
+
                 }
                 /// Grabbed End
                 if (Input.GetMouseButtonDown(0)) // Pickup system
@@ -150,7 +153,7 @@ public class PerspectiveTransform : MonoBehaviour
                 selectedRigidBody.GetComponent<Collider>().isTrigger = false;
                 selectedObject.layer = 0;
                 selectedObject.transform.parent = transform.parent;  // Pickup system
-                selectedObject.transform.position = mouseWorldPoint;
+                //selectedObject.transform.position = sweepTestData.point;
                 selectedObject.transform.rotation = new Quaternion(0, 0, 0, 1); // Pickup system remove/change
                 selectedRigidBody.isKinematic = false;
                 selectedRigidBody.useGravity = true;
@@ -179,7 +182,7 @@ public class PerspectiveTransform : MonoBehaviour
             Gizmos.color = Color.red;
             //Draw a Ray forward from GameObject toward the hit
             //Gizmos.DrawRay(transform.position, transform.forward * boxHit.distance);
-            Gizmos.DrawLine(transform.position, boxHit.point);
+            Gizmos.DrawLine(transform.position, sweepTestData.point);
             //Draw a cube that extends to where the hit exists
             Gizmos.DrawWireCube(transform.position + transform.forward * boxHit.distance, selectedObject.transform.localScale);
             //Gizmos.DrawMesh(selectedObject.GetComponent<Mesh>(), transform.position + transform.forward * boxHit.distance, selectedParent.transform.rotation, selectedParent.transform.localScale);
