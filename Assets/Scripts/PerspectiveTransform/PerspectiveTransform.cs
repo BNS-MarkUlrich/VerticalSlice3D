@@ -98,36 +98,45 @@ public class PerspectiveTransform : MonoBehaviour
                 selectedObject.transform.rotation = new Quaternion(0,0,0,1); // Pickup system remove/change
                 mouseWorldPoint = hitData.transform.position;
                 Physics.BoxCast(transform.position, selectedObject.transform.localScale/2, transform.forward, out boxHit, transform.rotation, collisionHit.distance); // = Quaternion.identity
-                collisionDetected = selectedRigidBody.SweepTest(ray.direction, out sweepTestData, collisionHit.distance); // = Quaternion.identity
-                //boxHits = Physics.BoxCastAll(selectedParent.GetComponent<Collider>().bounds.center, selectedParent.transform.localScale, transform.forward, transform.rotation = Quaternion.identity, 1000);
+                //collisionDetected = selectedRigidBody.SweepTest(ray.direction, out sweepTestData, collisionHit.distance); // = Quaternion.identity
                 //Debug.DrawLine(this.gameObject.transform.position, transform.position + transform.forward * boxHit.distance);
-                if (Vector3.Distance(selectedRigidBody.worldCenterOfMass, transform.position + transform.forward * boxHit.distance) > 1)
+                if (Vector3.Distance(selectedRigidBody.worldCenterOfMass, transform.position + transform.forward * boxHit.distance) > 6)
                 {
+                    float ErrorDistance = Vector3.Distance(selectedRigidBody.worldCenterOfMass, transform.position + transform.forward * boxHit.distance) / 2;
+
                     newDistance = Vector3.Distance(this.gameObject.transform.position, transform.position + transform.forward * boxHit.distance);
                     scaleModifier = newDistance / originalDistance;
-                    selectedObject.transform.localScale = originalScale * scaleModifier;
-
-                    float ErrorDistance = Vector3.Distance(selectedRigidBody.worldCenterOfMass, transform.position + transform.forward * sweepTestData.distance) / 2;
+                    Vector3.Lerp(selectedObject.transform.localScale, originalScale * scaleModifier, 2);
+                    //selectedObject.transform.localScale = originalScale * scaleModifier;
 
                     Vector3 medianPoint = (selectedRigidBody.worldCenterOfMass + transform.position + transform.forward * boxHit.distance) / 2f;
                     Vector3 objectErrorDestination = Vector3.MoveTowards(selectedRigidBody.worldCenterOfMass, medianPoint, ErrorDistance);
-                    Vector3 boxHitDestination = Vector3.MoveTowards(transform.position + transform.forward * sweepTestData.distance, medianPoint, ErrorDistance);
+                    Vector3 boxHitDestination = Vector3.MoveTowards(transform.position + transform.forward * boxHit.distance, medianPoint, collisionHit.distance);
+                    //Vector3.Lerp(selectedObject.transform.position, boxHit.point, 2);
+                    //Vector3.Lerp(boxHit.point, selectedRigidBody.worldCenterOfMass, 2);
                     selectedObject.transform.position = objectErrorDestination;
                     boxHit.point = boxHitDestination;
+                    if (selectedObject.transform.position.y < 0)
+                    {
+                        Debug.Log("Too low");
+                    }
 
                     Debug.DrawLine(selectedRigidBody.worldCenterOfMass, transform.position + transform.forward * boxHit.distance);
                     Debug.Log("Bye");
                 }
-                else if (Vector3.Distance(Camera.main.transform.position, selectedObject.transform.position) <= 0)
+                else if (Vector3.Distance(Camera.main.transform.position, selectedObject.transform.position) <= 0.5)
                 {
-                    selectedObject.transform.position = collisionHit.point;
                     newDistance = collisionHit.distance;
                     scaleModifier = newDistance / originalDistance;
                     selectedObject.transform.localScale = originalScale * scaleModifier;
+                    Vector3 boxHitDestination = Vector3.MoveTowards(transform.position, transform.position + transform.forward * boxHit.distance, collisionHit.distance);
+                    Vector3.Lerp(selectedObject.transform.position, boxHitDestination, 2f);
+                    //selectedObject.transform.position = collisionHit.point;
                     Debug.Log("Smoll");
                 }
                 else
                 {
+                    
                     newDistance = Vector3.Distance(this.gameObject.transform.position, transform.position + transform.forward * boxHit.distance);
                     scaleModifier = newDistance / originalDistance;
                     //selectedParent.transform.localScale = originalScale * scaleModifier;
@@ -136,10 +145,6 @@ public class PerspectiveTransform : MonoBehaviour
                     Vector3 mouseLocalPoint = Vector3.MoveTowards(transform.position, transform.position + transform.forward * boxHit.distance, boxHit.distance);
                     //selectedRigidBody.AddForce(selectedRigidBody.worldCenterOfMass * 250);
                     selectedObject.transform.position = mouseLocalPoint;
-                }
-                if (collisionDetected)
-                {
-
                 }
                 /// Grabbed End
                 if (Input.GetMouseButtonDown(0)) // Pickup system
@@ -181,8 +186,7 @@ public class PerspectiveTransform : MonoBehaviour
         {
             Gizmos.color = Color.red;
             //Draw a Ray forward from GameObject toward the hit
-            //Gizmos.DrawRay(transform.position, transform.forward * boxHit.distance);
-            Gizmos.DrawLine(transform.position, sweepTestData.point);
+            Gizmos.DrawRay(transform.position, transform.forward * boxHit.distance);
             //Draw a cube that extends to where the hit exists
             Gizmos.DrawWireCube(transform.position + transform.forward * boxHit.distance, selectedObject.transform.localScale);
             //Gizmos.DrawMesh(selectedObject.GetComponent<Mesh>(), transform.position + transform.forward * boxHit.distance, selectedParent.transform.rotation, selectedParent.transform.localScale);
