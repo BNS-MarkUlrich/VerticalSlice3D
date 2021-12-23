@@ -29,6 +29,7 @@ public class PerspectiveTransform : MonoBehaviour
     [SerializeField] private float scaleModifier;
 
     [SerializeField] private RaycastHit boxHit;
+    [SerializeField] private RaycastHit[] boxHits;
 
     [Header("Switch Cases")]
     [SerializeField] private States currentState = States.SelectionState;
@@ -76,7 +77,7 @@ public class PerspectiveTransform : MonoBehaviour
                 break;
             case States.InitialiseState:
                 /// Initialise Begin
-                originalPosition = selectedObject.transform.position;
+                originalPosition = selectedRigidBody.worldCenterOfMass;
                 originalRotation = selectedObject.transform.worldToLocalMatrix.rotation;
                 originalScale = selectedObject.transform.localScale;
                 originalDistance = Vector3.Distance(this.gameObject.transform.position, originalPosition);
@@ -84,7 +85,7 @@ public class PerspectiveTransform : MonoBehaviour
                 selectedRigidBody.GetComponent<Collider>().isTrigger = true;
                 selectedRigidBody.isKinematic = true;
                 selectedRigidBody.useGravity = false;
-                selectedRigidBody.SetDensity(10);
+                //selectedRigidBody.SetDensity(10);
                 //= selectedRigidBody.worldCenterOfMass;
                 //selectedRigidBody.sleepThreshold = ;
                 //selectedRigidBody.solverIterations = ;
@@ -99,12 +100,24 @@ public class PerspectiveTransform : MonoBehaviour
                 selectedParent.transform.localScale = originalScale * scaleModifier;
                 selectedObject.transform.rotation = new Quaternion(0,0,0,1); // Pickup system remove/change
                 mouseWorldPoint = hitData.transform.position;
-                collisionDetected = Physics.BoxCast(selectedParent.GetComponent<Collider>().bounds.center, selectedParent.transform.localScale, transform.forward, out boxHit, transform.rotation = Quaternion.identity, 1000);
-                if(collisionDetected)
+                collisionDetected = Physics.BoxCast(transform.position, selectedParent.transform.localScale/2, transform.forward, out boxHit, transform.rotation, collisionHit.distance); // = Quaternion.identity
+                //boxHits = Physics.BoxCastAll(selectedParent.GetComponent<Collider>().bounds.center, selectedParent.transform.localScale, transform.forward, transform.rotation = Quaternion.identity, 1000);
+                if (collisionDetected)
                 {
-                    Vector3 mouseLocalPoint = Vector3.MoveTowards(transform.position, transform.position + transform.forward * boxHit.distance, collisionHit.distance);
-                    //selectedRigidBody.AddForce(selectedRigidBody.worldCenterOfMass * 250);
-                    selectedObject.transform.position = mouseLocalPoint;
+                    if (Vector3.Distance(selectedObject.transform.position, transform.position + transform.forward * boxHit.distance) > 2)
+                    {
+                        Debug.Log("Bye");
+                        boxHit.point = new Vector3(collisionHit.point.x, selectedParent.transform.localScale.y, collisionHit.point.z);
+                        Vector3 backWardDirection = Vector3.MoveTowards(selectedObject.transform.position, collisionHit.point, collisionHit.distance);
+                        selectedObject.transform.position = boxHit.point;
+                    }
+                    else
+                    {
+                        Debug.Log("Hello");
+                        Vector3 mouseLocalPoint = Vector3.MoveTowards(transform.position, transform.position + transform.forward * boxHit.distance, boxHit.distance);
+                        //selectedRigidBody.AddForce(selectedRigidBody.worldCenterOfMass * 250);
+                        selectedObject.transform.position = mouseLocalPoint;
+                    }
                 }
                 /// Grabbed End
                 if (Input.GetMouseButtonDown(0)) // Pickup system
@@ -150,14 +163,27 @@ public class PerspectiveTransform : MonoBehaviour
             Gizmos.DrawLine(transform.position, boxHit.point);
             //Draw a cube that extends to where the hit exists
             Gizmos.DrawWireCube(transform.position + transform.forward * boxHit.distance, selectedParent.transform.localScale);
+            //Gizmos.DrawMesh(selectedObject.GetComponent<Mesh>(), transform.position + transform.forward * boxHit.distance, selectedParent.transform.rotation, selectedParent.transform.localScale);
         }
-        /*if (sphereCollision)
+
+
+        /// BoxHits
+        /*float totalX = 0f;
+        float totalY = 0f;
+        float totalZ = 0f;
+        foreach (var hit in boxHits)
         {
-            Gizmos.color = Color.red;
-            //Draw a Ray forward from GameObject toward the hit
-            //Gizmos.DrawRay(transform.position, transform.forward * boxHit.distance);
-            //Draw a cube that extends to where the hit exists
-            Gizmos.DrawWireSphere(transform.position, collisionHit.distance);
-        }*/
+            totalX += hit.point.x;
+            totalY += hit.point.y;
+            totalZ += hit.point.z;
+            //Gizmos.DrawLine(transform.position, hit.point);
+        }
+        float centerX = totalX / boxHits.Length;
+        float centerY = totalY / boxHits.Length;
+        float centerZ = totalZ / boxHits.Length;
+        Vector3 centerPoint = new Vector3(centerX, centerY, centerZ);
+        Gizmos.DrawLine(transform.position, centerPoint);
+        Gizmos.DrawWireCube(centerPoint, selectedParent.transform.localScale);*/
+        /// !BoxHits
     }
 }
