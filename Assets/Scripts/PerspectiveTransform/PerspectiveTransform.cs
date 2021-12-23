@@ -95,24 +95,31 @@ public class PerspectiveTransform : MonoBehaviour
                 break;
             case States.GrabbedState:
                 /// Grabbed Begin
-                newDistance = Vector3.Distance(this.gameObject.transform.position, selectedRigidBody.worldCenterOfMass);
-                scaleModifier = newDistance / originalDistance;
-                selectedParent.transform.localScale = originalScale * scaleModifier;
                 selectedObject.transform.rotation = new Quaternion(0,0,0,1); // Pickup system remove/change
                 mouseWorldPoint = hitData.transform.position;
-                collisionDetected = Physics.BoxCast(transform.position, selectedParent.transform.localScale/2, transform.forward, out boxHit, transform.rotation, collisionHit.distance); // = Quaternion.identity
+                collisionDetected = Physics.BoxCast(transform.position, selectedObject.transform.localScale/2, transform.forward, out boxHit, transform.rotation, collisionHit.distance); // = Quaternion.identity
                 //boxHits = Physics.BoxCastAll(selectedParent.GetComponent<Collider>().bounds.center, selectedParent.transform.localScale, transform.forward, transform.rotation = Quaternion.identity, 1000);
                 if (collisionDetected)
                 {
-                    if (Vector3.Distance(selectedObject.transform.position, transform.position + transform.forward * boxHit.distance) > 2)
+                    //Debug.DrawLine(this.gameObject.transform.position, transform.position + transform.forward * boxHit.distance);
+                    if (Vector3.Distance(selectedRigidBody.worldCenterOfMass, transform.position + transform.forward * boxHit.distance) > 2)
                     {
+                        Debug.DrawLine(selectedRigidBody.worldCenterOfMass, transform.position + transform.forward * boxHit.distance);
                         Debug.Log("Bye");
-                        boxHit.point = new Vector3(collisionHit.point.x, selectedParent.transform.localScale.y, collisionHit.point.z);
+                        Vector3 boxPoint = boxHit.point;
+                        boxPoint = new Vector3(collisionHit.point.x, collisionHit.point.y + selectedParent.transform.localScale.y / 2, collisionHit.point.z);
                         Vector3 backWardDirection = Vector3.MoveTowards(selectedObject.transform.position, collisionHit.point, collisionHit.distance);
-                        selectedObject.transform.position = boxHit.point;
+                        //selectedParent.transform.localScale = selectedObject.transform.localScale;
+                        //selectedObject.transform.localScale = selectedParent.transform.localScale;
+                        //selectedObject.transform.position = transform.position + transform.forward * boxHit.distance;
+                        //selectedObject.transform.position = boxHit.point;
                     }
                     else
                     {
+                        newDistance = Vector3.Distance(this.gameObject.transform.position, transform.position + transform.forward * boxHit.distance);
+                        scaleModifier = newDistance / originalDistance;
+                        //selectedParent.transform.localScale = originalScale * scaleModifier;
+                        selectedObject.transform.localScale = originalScale * scaleModifier;
                         Debug.Log("Hello");
                         Vector3 mouseLocalPoint = Vector3.MoveTowards(transform.position, transform.position + transform.forward * boxHit.distance, boxHit.distance);
                         //selectedRigidBody.AddForce(selectedRigidBody.worldCenterOfMass * 250);
@@ -162,7 +169,7 @@ public class PerspectiveTransform : MonoBehaviour
             //Gizmos.DrawRay(transform.position, transform.forward * boxHit.distance);
             Gizmos.DrawLine(transform.position, boxHit.point);
             //Draw a cube that extends to where the hit exists
-            Gizmos.DrawWireCube(transform.position + transform.forward * boxHit.distance, selectedParent.transform.localScale);
+            Gizmos.DrawWireCube(transform.position + transform.forward * boxHit.distance, selectedObject.transform.localScale);
             //Gizmos.DrawMesh(selectedObject.GetComponent<Mesh>(), transform.position + transform.forward * boxHit.distance, selectedParent.transform.rotation, selectedParent.transform.localScale);
         }
 
