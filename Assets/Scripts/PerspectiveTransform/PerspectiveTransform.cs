@@ -78,7 +78,7 @@ public class PerspectiveTransform : MonoBehaviour
             case States.InitialiseState:
                 /// Initialise Begin
                 originalPosition = selectedRigidBody.worldCenterOfMass;
-                originalRotation = selectedObject.transform.worldToLocalMatrix.rotation;
+                originalRotation = selectedObject.transform.rotation;
                 originalScale = selectedObject.transform.localScale;
                 originalDistance = Vector3.Distance(this.gameObject.transform.position, originalPosition);
 
@@ -95,9 +95,9 @@ public class PerspectiveTransform : MonoBehaviour
                 break;
             case States.GrabbedState:
                 /// Grabbed Begin
-                selectedObject.transform.rotation = new Quaternion(0,0,0,1); // Pickup system remove/change
+                //selectedObject.transform.rotation = new Quaternion(0,0,0,1); // Pickup system remove/change
                 mouseWorldPoint = hitData.transform.position;
-                Physics.BoxCast(transform.position, selectedObject.transform.localScale/2, transform.forward, out boxHit, transform.rotation, collisionHit.distance); // = Quaternion.identity
+                Physics.BoxCast(transform.position, selectedObject.transform.localScale/2, transform.forward, out boxHit, selectedObject.transform.rotation, collisionHit.distance); // = Quaternion.identity
                 //collisionDetected = selectedRigidBody.SweepTest(ray.direction, out sweepTestData, collisionHit.distance); // = Quaternion.identity
                 //Debug.DrawLine(this.gameObject.transform.position, transform.position + transform.forward * boxHit.distance);
                 if (Vector3.Distance(selectedRigidBody.worldCenterOfMass, transform.position + transform.forward * boxHit.distance) > 6)
@@ -106,16 +106,16 @@ public class PerspectiveTransform : MonoBehaviour
 
                     newDistance = Vector3.Distance(this.gameObject.transform.position, transform.position + transform.forward * boxHit.distance);
                     scaleModifier = newDistance / originalDistance;
-                    Vector3.Lerp(selectedObject.transform.localScale, originalScale * scaleModifier, 2);
-                    //selectedObject.transform.localScale = originalScale * scaleModifier;
+                    //selectedParent.transform.localScale = originalScale * scaleModifier;
+                    selectedObject.transform.localScale = originalScale * scaleModifier;
 
                     Vector3 medianPoint = (selectedRigidBody.worldCenterOfMass + transform.position + transform.forward * boxHit.distance) / 2f;
                     Vector3 objectErrorDestination = Vector3.MoveTowards(selectedRigidBody.worldCenterOfMass, medianPoint, ErrorDistance);
                     Vector3 boxHitDestination = Vector3.MoveTowards(transform.position + transform.forward * boxHit.distance, medianPoint, collisionHit.distance);
                     //Vector3.Lerp(selectedObject.transform.position, boxHit.point, 2);
+                    Vector3.Lerp(selectedObject.transform.position, objectErrorDestination, 2);
                     //Vector3.Lerp(boxHit.point, selectedRigidBody.worldCenterOfMass, 2);
-                    selectedObject.transform.position = objectErrorDestination;
-                    boxHit.point = boxHitDestination;
+                    //selectedObject.transform.position = objectErrorDestination;
                     if (selectedObject.transform.position.y < 0)
                     {
                         Debug.Log("Too low");
@@ -128,6 +128,7 @@ public class PerspectiveTransform : MonoBehaviour
                 {
                     newDistance = collisionHit.distance;
                     scaleModifier = newDistance / originalDistance;
+                    //selectedParent.transform.localScale = originalScale * scaleModifier;
                     selectedObject.transform.localScale = originalScale * scaleModifier;
                     Vector3 boxHitDestination = Vector3.MoveTowards(transform.position, transform.position + transform.forward * boxHit.distance, collisionHit.distance);
                     Vector3.Lerp(selectedObject.transform.position, boxHitDestination, 2f);
@@ -141,11 +142,18 @@ public class PerspectiveTransform : MonoBehaviour
                     scaleModifier = newDistance / originalDistance;
                     //selectedParent.transform.localScale = originalScale * scaleModifier;
                     selectedObject.transform.localScale = originalScale * scaleModifier;
-                    Debug.Log("Hello");
                     Vector3 mouseLocalPoint = Vector3.MoveTowards(transform.position, transform.position + transform.forward * boxHit.distance, boxHit.distance);
                     //selectedRigidBody.AddForce(selectedRigidBody.worldCenterOfMass * 250);
                     selectedObject.transform.position = mouseLocalPoint;
                 }
+                /*newDistance = Vector3.Distance(this.gameObject.transform.position, boxHit.point);
+                scaleModifier = newDistance / originalDistance;
+                //selectedParent.transform.localScale = originalScale * scaleModifier;
+                selectedObject.transform.localScale = originalScale * scaleModifier;
+                Vector3 mouseLocalPoint = Vector3.MoveTowards(transform.position, transform.position + transform.forward * boxHit.distance, boxHit.distance);
+                //selectedRigidBody.AddForce(selectedRigidBody.worldCenterOfMass * 250);
+                selectedObject.transform.position = mouseLocalPoint;*/
+                Debug.Log(boxHit.point);
                 /// Grabbed End
                 if (Input.GetMouseButtonDown(0)) // Pickup system
                 {
@@ -157,11 +165,11 @@ public class PerspectiveTransform : MonoBehaviour
                 collisionDetected = false;
                 selectedRigidBody.GetComponent<Collider>().isTrigger = false;
                 selectedObject.layer = 0;
-                selectedObject.transform.parent = transform.parent;  // Pickup system
                 //selectedObject.transform.position = sweepTestData.point;
-                selectedObject.transform.rotation = new Quaternion(0, 0, 0, 1); // Pickup system remove/change
+                //selectedObject.transform.rotation = originalRotation; // Pickup system remove/change
                 selectedRigidBody.isKinematic = false;
                 selectedRigidBody.useGravity = true;
+                selectedObject.transform.parent = transform.parent;  // Pickup system
                 /// Initialise End
                 currentState = States.SelectionState;
                 break;
@@ -169,7 +177,7 @@ public class PerspectiveTransform : MonoBehaviour
                 break;
         }
     }
-    
+
     private enum States
     {
         SelectionState,
