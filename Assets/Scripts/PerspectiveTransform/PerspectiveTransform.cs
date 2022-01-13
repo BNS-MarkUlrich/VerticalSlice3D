@@ -107,7 +107,7 @@ public class PerspectiveTransform : MonoBehaviour
                     newDistance = Vector3.Distance(this.gameObject.transform.position, transform.position + transform.forward * boxHit.distance);
                     scaleModifier = newDistance / originalDistance;
                     //selectedParent.transform.localScale = originalScale * scaleModifier;
-                    selectedObject.transform.localScale = originalScale * scaleModifier;
+                    //selectedObject.transform.localScale = originalScale * scaleModifier;
 
                     Vector3 medianPoint = (selectedRigidBody.worldCenterOfMass + transform.position + transform.forward * boxHit.distance) / 2f;
                     Vector3 objectErrorDestination = Vector3.MoveTowards(selectedRigidBody.worldCenterOfMass, medianPoint, ErrorDistance);
@@ -129,7 +129,7 @@ public class PerspectiveTransform : MonoBehaviour
                     newDistance = collisionHit.distance;
                     scaleModifier = newDistance / originalDistance;
                     //selectedParent.transform.localScale = originalScale * scaleModifier;
-                    selectedObject.transform.localScale = originalScale * scaleModifier;
+                    //selectedObject.transform.localScale = originalScale * scaleModifier;
                     Vector3 boxHitDestination = Vector3.MoveTowards(transform.position, transform.position + transform.forward * boxHit.distance, collisionHit.distance);
                     Vector3.Lerp(selectedObject.transform.position, boxHitDestination, 2f);
                     //selectedObject.transform.position = collisionHit.point;
@@ -141,7 +141,7 @@ public class PerspectiveTransform : MonoBehaviour
                     newDistance = Vector3.Distance(this.gameObject.transform.position, transform.position + transform.forward * boxHit.distance);
                     scaleModifier = newDistance / originalDistance;
                     //selectedParent.transform.localScale = originalScale * scaleModifier;
-                    selectedObject.transform.localScale = originalScale * scaleModifier;
+                    //selectedObject.transform.localScale = originalScale * scaleModifier;
                     Vector3 mouseLocalPoint = Vector3.MoveTowards(transform.position, transform.position + transform.forward * boxHit.distance, boxHit.distance);
                     //selectedRigidBody.AddForce(selectedRigidBody.worldCenterOfMass * 250);
                     selectedObject.transform.position = mouseLocalPoint;

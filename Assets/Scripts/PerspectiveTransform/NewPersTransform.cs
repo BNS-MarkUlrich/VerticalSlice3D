@@ -27,7 +27,7 @@ public class NewPersTransform : MonoBehaviour
     [SerializeField] private float scaleModifier;
 
     private RaycastHit boxHit;
-    private Collider[] boxHits;
+    private RaycastHit[] boxHits;
 
     [Header("Switch Cases")]
     [SerializeField] private States currentState = States.SelectionState;
@@ -89,30 +89,36 @@ public class NewPersTransform : MonoBehaviour
                 /// Grabbed Begin
                 collisionDetected = true;
                 selectedObject.transform.rotation = new Quaternion(selectedObject.transform.rotation.x, 0, selectedObject.transform.rotation.z, 1); // Reset rotation
-                boxHits = Physics.OverlapBox(selectedObject.transform.position, selectedObject.transform.localScale/2);
-                //Physics.BoxCast(transform.position, selectedObject.transform.localScale / 2, transform.forward, out boxHit, selectedObject.transform.rotation, collisionHit.distance); // = Quaternion.identity
+                //boxHits = Physics.OverlapBox(selectedObject.transform.position, selectedObject.transform.localScale/2);
+                boxHits = Physics.BoxCastAll(transform.position, selectedObject.transform.localScale/2, transform.forward, selectedObject.transform.rotation, collisionHit.distance); // = Quaternion.identity
 
-                float distance = Vector3.Distance(transform.position, selectedObject.transform.position);
-                /*float shortestDistance = collisionHit.distance; // Max short distance
+                //float distance = Vector3.Distance(transform.position, selectedObject.transform.position);
+                float shortestDistance = collisionHit.distance; // Max short distance
                 for (int i = 0; i < boxHits.Length; i++) // Get minimal distance in array
                 {
-                    distance = Vector3.Distance(transform.position, boxHits[i].transform.position);
-                    if (distance < shortestDistance)
+                    //distance = Vector3.Distance(transform.position, boxHits[i].transform.position);
+                    if (shortestDistance > boxHits[i].distance)
                     {
-                        shortestDistance = distance;
+                        shortestDistance = boxHits[i].distance;
                     }
-                }*/
+                }
                 //Debug.Log("Shortest Distance = " + shortestDistance);
 
-                newDistance = distance;
+                // Debug Lines
+                foreach (var newhit in boxHits)
+                {
+                    Debug.DrawLine(transform.position, newhit.point);
+                    //Debug.Log(newhit.transform.name);
+                }
+                // !Debug Lines
+
+                newDistance = shortestDistance;
                 scaleModifier = newDistance / originalDistance; // Set scale modifier
-                //Physics.BoxCast(transform.position, originalScale * scaleModifier, transform.forward, out boxHit, selectedObject.transform.rotation, collisionHit.distance); // = Quaternion.identity
                 Collider[] newBoxHits = Physics.OverlapBox(selectedObject.transform.position, originalScale * scaleModifier, originalRotation, selectableLayer);
 
                 // Debug Lines
                 foreach (var newhit in newBoxHits)
                 {
-                    //Debug.DrawLine(transform.position, newhit.point);
                     Debug.Log(newhit.transform.name);
                 }
                 // !Debug Lines
@@ -120,7 +126,8 @@ public class NewPersTransform : MonoBehaviour
                 if (newBoxHits.Length == 0)
                     selectedObject.transform.localScale = originalScale * scaleModifier; // Set scale
 
-                Vector3 mouseLocalPoint = Vector3.MoveTowards(transform.position, transform.position + transform.forward * boxHit.distance, boxHit.distance); // Calculate optimal position
+                //selectedObject.transform.localScale = originalScale * scaleModifier; // Set scale
+                Vector3 mouseLocalPoint = Vector3.MoveTowards(transform.position, transform.position + transform.forward * newDistance, newDistance); // Calculate optimal position
                 selectedObject.transform.position = mouseLocalPoint; // Set position
                 /// Grabbed End
                 if (Input.GetMouseButtonDown(0)) // Click to let go of object
