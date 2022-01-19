@@ -142,7 +142,7 @@ public class NewPersTransform : MonoBehaviour
                 selectedObject.layer = 0;
                 selectedRigidBody.isKinematic = false;
                 selectedRigidBody.useGravity = true;
-                selectedObject.transform.parent = transform.parent;  // Pickup system
+                selectedObject.transform.parent = this.transform.parent.transform.parent;  // Pickup system
                 /// Drop End
                 currentState = States.SelectionState;
                 break;
