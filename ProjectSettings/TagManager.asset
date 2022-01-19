@@ -4,7 +4,6 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - NoMoveThrough
   - Selectable
   layers:
   - Default
@@ -13,7 +12,7 @@ TagManager:
   - Selectables
   - Water
   - UI
-  - RaycastBox
+  - 
   - 
   - 
   - 
