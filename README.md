@@ -4,7 +4,7 @@
 
 **Main** - Contains the last publically available release. Tested, clean and stable.
 
-**Develop** - Contains the current in-development build for the next release. Contains only functional, tested and bugfree features added for the next update. Once you finish with a feature or fix branch, you merge it into develop.
+**Develop** - Contains the current in-development build for the next release. Contains only functional, tested and bugfree features added for the next update. Once you finish with a feature or fix branch, you merge it into develop. 
 
 **feature/** - Every time you start working on a new feature open a new branch titled feature/FeatureName, e.g. feature/SmokeGrenades, feature/Salute. Work and push on this branch until the feature is complete and tested, then you can merge into develop.
 
