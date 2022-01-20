@@ -4,12 +4,20 @@
 TagManager:
   serializedVersion: 2
   tags:
+<<<<<<< HEAD
   - NoMoveThrough
+=======
+  - Selectable
+>>>>>>> ca82fd095bf78e805057833660f1f5c774995549
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
+<<<<<<< HEAD
   - 
+=======
+  - Selectables
+>>>>>>> ca82fd095bf78e805057833660f1f5c774995549
   - Water
   - UI
   - 
