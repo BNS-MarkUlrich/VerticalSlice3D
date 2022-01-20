@@ -41,7 +41,6 @@ public class ObjectSounds : MonoBehaviour
     {
         if(collision.relativeVelocity.magnitude > 1 && collision.gameObject.tag != "Player")
         {
-            Debug.Log("Geluiden");
             _audioSource.PlayOneShot(_fallingSound);
         }
     }
