@@ -222,9 +222,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa844394de670f849b91332685b04eef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _sWalking: {fileID: 0}
-  _sLooking: {fileID: 0}
-  _sJumping: {fileID: 0}
+  _sWalking: {fileID: 41414242}
+  _sLooking: {fileID: 41414246}
+  _sJumping: {fileID: 41414245}
 --- !u!114 &41414242
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -282,6 +282,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   jumpForce: 5
+  _audioSource: {fileID: 0}
+  _groundClip: {fileID: 0}
+  _blockClip: {fileID: 0}
+  _pionClip: {fileID: 0}
+  _checkerboardClip: {fileID: 0}
+  _boxClip: {fileID: 0}
 --- !u!114 &41414246
 MonoBehaviour:
   m_ObjectHideFlags: 0
