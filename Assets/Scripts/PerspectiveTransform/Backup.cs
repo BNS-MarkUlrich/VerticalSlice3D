@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NewPersTransform : MonoBehaviour
+public class Backup : MonoBehaviour
 {
     // Remove [SerializeField] later
     [Header("Selected Object")]
@@ -22,18 +22,18 @@ public class NewPersTransform : MonoBehaviour
     private RaycastHit hitData;
 
     [Header("Scale & Distance")]
-    [SerializeField] private float incrementDistance;
     [SerializeField] private float newDistance;
+    [SerializeField] private float shortestDistance;
     [SerializeField] private float originalDistance;
+
     [SerializeField] private float scaleModifier;
+    [SerializeField] private float newScaleModifier;
 
     private RaycastHit boxHit;
     private RaycastHit[] boxHits;
 
     private Collider[] newBoxHits;
 
-    [SerializeField] private Vector3 originalBoxCastPos;
-    [SerializeField] private Vector3 newBoxCastPos;
 
     [Header("Switch Cases")]
     [SerializeField] private States currentState = States.SelectionState;
@@ -78,7 +78,7 @@ public class NewPersTransform : MonoBehaviour
                 originalPosition = selectedRigidBody.worldCenterOfMass;
                 originalRotation = selectedObject.transform.rotation;
                 originalScale = selectedObject.transform.localScale;
-                originalDistance = Vector3.Distance(transform.position, originalPosition);
+                originalDistance = Vector3.Distance(this.gameObject.transform.position, originalPosition);
                 // !Get original data
 
                 // Rigidbody setup
@@ -93,36 +93,18 @@ public class NewPersTransform : MonoBehaviour
                 break;
             case States.GrabbedState:
                 /// Grabbed Begin
-                collisionDetected = true;
-                newDistance = Vector3.Distance(transform.position, selectedObject.transform.position);
-                scaleModifier = newDistance / originalDistance;
-                selectedObject.transform.localScale = originalScale * scaleModifier; // Set scale
-                incrementDistance = collisionHit.distance / 10;
-                originalBoxCastPos = transform.position;
-                for (int i = 0; i < 10; i++)
-                {
-                    newBoxCastPos = Vector3.MoveTowards(originalBoxCastPos, originalBoxCastPos + transform.forward * incrementDistance, incrementDistance); // Calculate optimal position
-                    if (i < 10)
-                    {
-                        boxHits = Physics.BoxCastAll(originalBoxCastPos, selectedObject.transform.localScale / 2, transform.forward, selectedObject.transform.rotation, incrementDistance);
-                        float shortestDistance = Vector3.Distance(originalBoxCastPos, newBoxCastPos); ; // Max short distance
-                        for (int y = 0; y < boxHits.Length; y++) // Get minimal distance in array
-                        {
-                            if (shortestDistance > boxHits[y].distance)
-                            {
-                                shortestDistance = boxHits[y].distance;
-                            }
-                        }
-                        selectedObject.transform.position = Vector3.MoveTowards(selectedObject.transform.position, originalBoxCastPos + transform.forward * shortestDistance, shortestDistance); // Calculate optimal position
-                        Debug.DrawLine(originalBoxCastPos, newBoxCastPos, Color.red);
-                    }
-                    originalBoxCastPos = selectedObject.transform.position;
-                }
+                CastBox();
+                GetShortestDistance();
+                //DebugLines();
+                SetScaleModifier();
+                OverLapBoxCollider();
+                SetPosition();
+                ChangeScale();
+                /// Grabbed End
                 if (Input.GetMouseButtonDown(0)) // Click to let go of object
                 {
                     currentState = States.DropState;
                 }
-                /// Grabbed End
                 break;
             case States.DropState:
                 /// Drop Begin
@@ -131,13 +113,90 @@ public class NewPersTransform : MonoBehaviour
                 selectedObject.layer = 0;
                 selectedRigidBody.isKinematic = false;
                 selectedRigidBody.useGravity = true;
-                selectedObject.transform.parent = this.transform.parent.transform.parent;  // Pickup system
+                //selectedObject.transform.parent = this.transform.parent.transform.parent;  // Pickup system
                 /// Drop End
                 currentState = States.SelectionState;
                 break;
             default:
                 break;
         }
+    }
+
+    private void CastBox()
+    {
+        collisionDetected = true;
+        selectedObject.transform.rotation = new Quaternion(selectedObject.transform.rotation.x, 0, selectedObject.transform.rotation.z, 1); // Reset rotation
+        boxHits = Physics.BoxCastAll(transform.position, selectedObject.transform.localScale / 2, transform.forward, selectedObject.transform.rotation, collisionHit.distance); // = Quaternion.identity
+    }
+
+
+    private void GetShortestDistance()
+    {
+        if (boxHits == null)
+        {
+            shortestDistance = collisionHit.distance;
+        }
+        else
+        {
+            //float distance = Vector3.Distance(transform.position, selectedObject.transform.position);
+            shortestDistance = boxHits[0].distance; // Max short distance
+            for (int i = 0; i < boxHits.Length; i++) // Get minimal distance in array
+            {
+                Debug.DrawLine(transform.position, boxHits[i].point);
+                //distance = Vector3.Distance(transform.position, boxHits[i].transform.position);
+                if (shortestDistance > boxHits[i].distance)
+                {
+                    shortestDistance = boxHits[i].distance;
+                }
+            }
+            //Debug.Log("Shortest Distance = " + shortestDistance);
+        }
+    }
+
+    private void DebugLines()
+    {
+        // Debug Lines
+        foreach (var newhit in boxHits)
+        {
+            Debug.DrawLine(transform.position, newhit.point);
+            Debug.Log(newhit.transform.name);
+        }
+        // !Debug Lines
+    }
+
+    private void SetScaleModifier()
+    {
+        newDistance = shortestDistance;
+        //newDistance = Vector3.Distance(transform.position, selectedObject.transform.position);
+        scaleModifier = newDistance / originalDistance; // Set scale modifier
+    }
+
+    private void OverLapBoxCollider()
+    {
+        newBoxHits = Physics.OverlapBox(selectedObject.transform.position, originalScale * scaleModifier, originalRotation, selectableLayer);
+
+        // Debug Lines
+        foreach (var newhit in newBoxHits)
+        {
+            Debug.Log(newhit.transform.name);
+        }
+        // !Debug Lines
+    }
+
+    private void ChangeScale()
+    {
+        selectedObject.transform.localScale = originalScale * scaleModifier; // Set scale
+        /*if (newBoxHits.Length == 0)
+        {
+            selectedObject.transform.localScale = originalScale * scaleModifier; // Set scale
+        }*/
+    }
+
+    private void SetPosition()
+    {
+        Vector3 mouseLocalPoint = Vector3.MoveTowards(transform.position, transform.position + transform.forward * newDistance, newDistance); // Calculate optimal position
+        selectedObject.transform.position = mouseLocalPoint; // Set position
+        ChangeScale();
     }
 
     private enum States
@@ -156,9 +215,9 @@ public class NewPersTransform : MonoBehaviour
         {
             Gizmos.color = Color.red;
             //Draw a Ray forward from GameObject toward the hit
-            //Gizmos.DrawRay(transform.position, transform.forward * boxHit.distance);
+            Gizmos.DrawRay(transform.position, transform.forward * boxHit.distance);
             //Draw a cube that extends to where the hit exists
-            Gizmos.DrawWireCube(selectedObject.transform.position, selectedObject.transform.localScale);
+            Gizmos.DrawWireCube(selectedObject.transform.position, originalScale * scaleModifier);
             //Gizmos.DrawMesh(selectedObject.GetComponent<Mesh>(), transform.position + transform.forward * boxHit.distance, selectedParent.transform.rotation, selectedParent.transform.localScale);
         }
     }
