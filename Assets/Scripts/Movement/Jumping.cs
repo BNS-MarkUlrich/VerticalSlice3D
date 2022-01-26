@@ -13,6 +13,7 @@ public class Jumping : MonoBehaviour
     [SerializeField] private AudioClip _pionClip;
     [SerializeField] private AudioClip _checkerboardClip;
     [SerializeField] private AudioClip _boxClip;
+    [SerializeField] private AudioClip _jumpUPClip;
 
     private void Start()
     {
@@ -23,12 +24,14 @@ public class Jumping : MonoBehaviour
         _pionClip = Resources.Load<AudioClip>("Music/Player/LandingImpactSoundPion");
         _checkerboardClip = Resources.Load<AudioClip>("Music/Player/LandingImpactCheckerBoard");
         _boxClip = Resources.Load<AudioClip>("Music/Player/LandingImpactBox");
+        _jumpUPClip = Resources.Load<AudioClip>("Music/Player/JumpUP");
     }
 
     public void Jump(InputAction.CallbackContext context)
     {
         if (Mathf.Abs(thisRigidbody.velocity.y) < 0.001f)
         {
+            _audioSource.PlayOneShot(_jumpUPClip,2);
             thisRigidbody.AddForce(new Vector3(0, jumpForce), ForceMode.Impulse);
         }
     }

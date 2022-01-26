@@ -6,7 +6,7 @@ public class PionFallSound : ObjectSounds
 {
     private void Awake()
     {
-        smallAudio = Resources.Load<AudioClip>("Music/superliminalSteamBoxFallSmall");
+        smallAudio = Resources.Load<AudioClip>("Music/superliminalSteamPionFallSmall");
         mediumAudio = Resources.Load<AudioClip>("Music/SuperliminalSteamPionMediumFall");
         bigAudio = Resources.Load<AudioClip>("Music/SuperliminalSteamPionBigFall");
     }
