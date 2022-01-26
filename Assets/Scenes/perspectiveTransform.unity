@@ -1667,9 +1667,12 @@ MonoBehaviour:
   originalRotation: {x: 0, y: 0, z: 0, w: 0}
   originalScale: {x: 0, y: 0, z: 0}
   collisionDetected: 0
+  incrementDistance: 0
   newDistance: 0
   originalDistance: 0
   scaleModifier: 0
+  originalBoxCastPos: {x: 0, y: 0, z: 0}
+  newBoxCastPos: {x: 0, y: 0, z: 0}
   currentState: 0
 --- !u!1 &1579866453
 GameObject:
@@ -2568,6 +2571,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: playbox
       objectReference: {fileID: 0}
+    - target: {fileID: 3465035833618877096, guid: b7295427039485a4bba03fb80525020d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 8b47f02a8bd8a1642b591bb5e755f329, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b7295427039485a4bba03fb80525020d, type: 3}
 --- !u!1001 &3545645833657895190
