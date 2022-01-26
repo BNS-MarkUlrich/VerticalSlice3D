@@ -7,36 +7,44 @@ public class NewPersTransform : MonoBehaviour
     // Remove [SerializeField] later
     [Header("Selected Object")]
     [SerializeField] public GameObject selectedObject; // Pickup system
-    [SerializeField] private Rigidbody selectedRigidBody;
-    [SerializeField] private GameObject selectedParent; // Pickup system
-    [SerializeField] private LayerMask selectableLayer;
+    [SerializeField] protected Rigidbody selectedRigidBody;
+    [SerializeField] protected GameObject selectedParent; // Pickup system
+    [SerializeField] protected LayerMask selectableLayer;
 
-    [SerializeField] private Vector3 originalPosition;
-    [SerializeField] private Quaternion originalRotation;
-    [SerializeField] private Vector3 originalScale;
+    [SerializeField] protected Vector3 originalPosition;
+    [SerializeField] protected Quaternion originalRotation;
+    [SerializeField] protected Vector3 originalScale;
 
     public bool collisionDetected;
 
     [Header("Mouse Position")]
-    private RaycastHit collisionHit;
-    private RaycastHit hitData;
+    protected RaycastHit collisionHit;
+    protected RaycastHit hitData;
 
     [Header("Scale & Distance")]
-    [SerializeField] private float incrementDistance;
-    [SerializeField] private float newDistance;
-    [SerializeField] private float originalDistance;
-    [SerializeField] private float scaleModifier;
+    [SerializeField] protected float incrementDistance;
+    [SerializeField] protected float newDistance;
+    [SerializeField] protected float originalDistance;
+    [SerializeField] protected float scaleModifier;
 
-    private RaycastHit boxHit;
-    private RaycastHit[] boxHits;
+    [SerializeField] protected float shortestDistance;
 
-    private Collider[] newBoxHits;
+    protected RaycastHit boxHit;
+    protected RaycastHit[] boxHits;
 
-    [SerializeField] private Vector3 originalBoxCastPos;
-    [SerializeField] private Vector3 newBoxCastPos;
+    protected Collider[] overlapHits;
+
+    [SerializeField] protected Vector3 originalBoxCastPos;
+    [SerializeField] protected Vector3 newBoxCastPos;
+
+    [Header("Bools")]
+    [SerializeField] public bool selection;
+    [SerializeField] public bool initialise;
+    [SerializeField] public bool grabbed;
+    [SerializeField] public bool dropped;
 
     [Header("Switch Cases")]
-    [SerializeField] private States currentState = States.SelectionState;
+    [SerializeField] public States currentState = States.SelectionState;
 
     private void Start()
     {
@@ -54,12 +62,15 @@ public class NewPersTransform : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out collisionHit, 1000)) // Check for collision in level
         {
-            //Debug.DrawLine(this.gameObject.transform.position, collisionHit.point, Color.blue);
+           Debug.DrawLine(this.gameObject.transform.position, collisionHit.point, Color.blue);
         }
-
         switch (currentState)
         {
             case States.SelectionState:
+                selection = true;
+                initialise = false;
+                grabbed = false;
+                dropped = false;
                 scaleModifier = 1; // Reset scale modifier
                 if (Input.GetMouseButtonDown(0)) // Must select object to begin.
                 {
@@ -73,12 +84,17 @@ public class NewPersTransform : MonoBehaviour
                 }
                 break;
             case States.InitialiseState:
+                selection = false;
+                initialise = true;
+                grabbed = false;
+                dropped = false;
                 /// Initialise Begin
                 // Get original data
-                originalPosition = selectedRigidBody.worldCenterOfMass;
+                originalPosition = selectedObject.transform.position;
                 originalRotation = selectedObject.transform.rotation;
                 originalScale = selectedObject.transform.localScale;
                 originalDistance = Vector3.Distance(transform.position, originalPosition);
+                //originalDistance = hitData.distance;
                 // !Get original data
 
                 // Rigidbody setup
@@ -92,6 +108,10 @@ public class NewPersTransform : MonoBehaviour
                 currentState = States.GrabbedState;
                 break;
             case States.GrabbedState:
+                selection = false;
+                initialise = false;
+                grabbed = true;
+                dropped = false;
                 /// Grabbed Begin
                 collisionDetected = true;
                 newDistance = Vector3.Distance(transform.position, selectedObject.transform.position);
@@ -101,14 +121,15 @@ public class NewPersTransform : MonoBehaviour
                 originalBoxCastPos = transform.position;
                 for (int i = 0; i < 10; i++)
                 {
-                    newBoxCastPos = Vector3.MoveTowards(originalBoxCastPos, originalBoxCastPos + transform.forward * incrementDistance, incrementDistance); // Calculate optimal position
                     if (i < 10)
                     {
-                        boxHits = Physics.BoxCastAll(originalBoxCastPos, selectedObject.transform.localScale / 2, transform.forward, selectedObject.transform.rotation, incrementDistance);
-                        float shortestDistance = Vector3.Distance(originalBoxCastPos, newBoxCastPos); ; // Max short distance
+                        newBoxCastPos = Vector3.MoveTowards(originalBoxCastPos, originalBoxCastPos + transform.forward * incrementDistance, incrementDistance); // Calculate optimal position
+                        boxHits = Physics.BoxCastAll(originalBoxCastPos, (originalScale * scaleModifier)/2, transform.forward, selectedObject.transform.rotation, incrementDistance);
+                        shortestDistance = Vector3.Distance(originalBoxCastPos, newBoxCastPos); ; // Max short distance
                         for (int y = 0; y < boxHits.Length; y++) // Get minimal distance in array
                         {
-                            if (shortestDistance > boxHits[y].distance)
+                            //Debug.Log(boxHits[y].transform.name);
+                            if (shortestDistance > boxHits[y].distance && boxHits[y].transform.tag != "Player")
                             {
                                 shortestDistance = boxHits[y].distance;
                             }
@@ -125,22 +146,34 @@ public class NewPersTransform : MonoBehaviour
                 /// Grabbed End
                 break;
             case States.DropState:
-                /// Drop Begin
+                selection = false;
+                initialise = false;
+                grabbed = false;
+                dropped = true;
+                /// Initialise Begin
                 collisionDetected = false;
                 selectedRigidBody.GetComponent<Collider>().isTrigger = false;
                 selectedObject.layer = 0;
                 selectedRigidBody.isKinematic = false;
                 selectedRigidBody.useGravity = true;
                 selectedObject.transform.parent = this.transform.parent.transform.parent;  // Pickup system
-                /// Drop End
+                /// Initialise End
                 currentState = States.SelectionState;
-                break;
-            default:
                 break;
         }
     }
 
-    private enum States
+    public GameObject GetSelectedObject()
+    {
+        return selectedObject;
+    }
+
+    public States GetCurrentState()
+    {
+        return currentState;
+    }
+
+    public enum States
     {
         SelectionState,
         InitialiseState,
@@ -158,7 +191,7 @@ public class NewPersTransform : MonoBehaviour
             //Draw a Ray forward from GameObject toward the hit
             //Gizmos.DrawRay(transform.position, transform.forward * boxHit.distance);
             //Draw a cube that extends to where the hit exists
-            Gizmos.DrawWireCube(selectedObject.transform.position, selectedObject.transform.localScale);
+            Gizmos.DrawWireCube(selectedObject.transform.position, originalScale * scaleModifier);
             //Gizmos.DrawMesh(selectedObject.GetComponent<Mesh>(), transform.position + transform.forward * boxHit.distance, selectedParent.transform.rotation, selectedParent.transform.localScale);
         }
     }
