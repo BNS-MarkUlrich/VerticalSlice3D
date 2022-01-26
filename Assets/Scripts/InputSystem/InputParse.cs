@@ -11,26 +11,29 @@ public class InputParse : MonoBehaviour
     [SerializeField] private CameraMoving _sLooking;
     [SerializeField] private Jumping _sJumping;
     [SerializeField] private Pickup _sRotateMode;
+    [SerializeField] private Pickup _sGrab;
     public bool _isLooking;
     public bool _isRotating;
-    //[SerializeField] private Grab _sGrab;
+    public bool _canGrab;
     //[SerializeField] private ResetClone _sResetClone;
     //[SerializeField] private RestartChallenge _sRestartChallenge;
-
+    private Pickup Pickup;
     // Start is called before the first frame update
     void Start()
     {
+        
         _isRotating = false;
         _isLooking = true;
+        _canGrab = false;
         _controls = new FPControl();
         _inputControls = _controls.PlayerInput;
         _sWalking = this.gameObject.GetComponent<Walking>();
         _sJumping = this.gameObject.GetComponent<Jumping>();
         _sLooking = this.gameObject.GetComponentInChildren<CameraMoving>();
         _sRotateMode = this.gameObject.GetComponent<Pickup>();
-
+        _sGrab = this.gameObject.GetComponent<Pickup>();
         _inputControls.Jumping.performed += _sJumping.Jump;
-        //_inputControls.//.performed += _sGrab.//;
+        _inputControls.GrabReleaseUse.performed += _sGrab.Grab;
         _inputControls.RotateMode.performed += _sRotateMode.HoldRotate;
         //_inputControls.//.performed += _sResetClonde.//;
         //_inputControls.//.performed += _sRestartChallenge.//;

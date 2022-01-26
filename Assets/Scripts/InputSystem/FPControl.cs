@@ -286,7 +286,7 @@ public class @FPControl : IInputActionCollection, IDisposable
                     ""name"": """",
                     ""id"": ""2b384e42-cfd1-4936-8b78-61d43174079a"",
                     ""path"": ""<Mouse>/rightButton"",
-                    ""interactions"": ""Hold"",
+                    ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Rotate Mode"",

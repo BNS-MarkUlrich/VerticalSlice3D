@@ -16,6 +16,7 @@ public class Pickup : MonoBehaviour
     [SerializeField] private Vector3 selectedParentOriginalPosition;
     private float number;
     public bool collisionDetected;
+    public bool grab;
     private Camera MainCamera;
     [SerializeField] private Quaternion lastCameraPosition;
     private Quaternion newCameraPosition;
@@ -40,14 +41,14 @@ public class Pickup : MonoBehaviour
     private InputParse inputParse;
 
     private float sensX;
-    private float rotX;
+
 
     private void Start()
     {
         inputParse = FindObjectOfType<InputParse>();
         MainCamera = Camera.main;
         sensX = 3;
-        number = 2;
+        number = 0.2f;
         _controls = new FPControl();
         _inputControls = _controls.PlayerInput;
         selectedParent = new GameObject("SelectedObject Handler"); // Pickup system
@@ -59,20 +60,22 @@ public class Pickup : MonoBehaviour
 
     public void HoldRotate(InputAction.CallbackContext context)
     {
-        inputParse._isLooking = false;
         inputParse._isRotating = true;
+        inputParse._isLooking = false;
+    }
+    public void Grab(InputAction.CallbackContext context) 
+    {
+        StartCoroutine(grabbing());
+        Debug.Log("grab");
     }
     public void Rotating(Vector2 pos)
     {
-        Debug.Log("m2");
-        rotX += pos.x * sensX;
-        selectedObject.transform.Rotate(0, -pos.x, 0);
-        Debug.Log(pos.x);
+        selectedObject.transform.Rotate(0, -pos.x / 15, 0);
     }
     private void Update()
     {
+        Debug.Log(grab);
 
-        
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hitData;
         LayerMask mask = LayerMask.GetMask("Default");
@@ -98,14 +101,12 @@ public class Pickup : MonoBehaviour
             case States.SelectionState:
                 scaleModifier = 1;
                 /// Call Selection/Pickup System here
-                if (Input.GetMouseButtonDown(0)) // Must select object to begin. Pickup system
+                if (Physics.Raycast(ray, out hitData, 1000) && hitData.transform.tag == "Selectable" && grab)
                 {
-                    if (Physics.Raycast(ray, out hitData, 1000) && hitData.transform.tag == "Selectable")
-                    {
-                        selectedObject = hitData.transform.gameObject; // Pickup system
-                        selectedRigidBody = selectedObject.GetComponent<Rigidbody>();
-                        currentState = States.InitialiseState;
-                    }
+                    Debug.Log("grabbing");
+                    selectedObject = hitData.transform.gameObject; // Pickup system
+                    selectedRigidBody = selectedObject.GetComponent<Rigidbody>();
+                    currentState = States.InitialiseState;
                 }
                 break;
             case States.InitialiseState:
@@ -119,7 +120,7 @@ public class Pickup : MonoBehaviour
                 selectedRigidBody.useGravity = true;
                 selectedObject.transform.parent = selectedParent.transform;  // Pickup system
                 //selectedRigidBody.freezeRotation = true;
-                number = 2;
+                number = 0.2f;
                 /// Initialise End
                 currentState = States.GrabbedState;
                 break;
@@ -175,7 +176,7 @@ public class Pickup : MonoBehaviour
                         break;
                 }
                 /// Grabbed End
-                if (Input.GetMouseButtonDown(0)) // Pickup system
+                if (grab) // Pickup system
                 {
                     selectedRigidBody.freezeRotation = false; // Pickup system
                     selectedObject.transform.parent = transform.parent;  // Pickup system
@@ -204,7 +205,14 @@ public class Pickup : MonoBehaviour
         }
 
     }
-    
+    private IEnumerator grabbing()
+    {
+        grab = true;
+        Debug.Log("yield");
+        yield return new WaitForEndOfFrame();
+        grab = false;
+    }
+
 
     private enum ScalingModes
     {
@@ -216,6 +224,7 @@ public class Pickup : MonoBehaviour
     {
         SelectionState,
         InitialiseState,
+        GrabbingState,
         GrabbedState,
         DropState
     }
