@@ -37,6 +37,6 @@ public class InputParse : MonoBehaviour
     void Update()
     {
         _sWalking.Walk(_inputControls.Movement.ReadValue<Vector2>());
-        _sLooking.Looking(_inputControls.Lookingrotating.ReadValue<Vector2>());
+        //_sLooking.Looking(_inputControls.Lookingrotating.ReadValue<Vector2>());
     }
 }
