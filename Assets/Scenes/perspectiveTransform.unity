@@ -4748,6 +4748,11 @@ MonoBehaviour:
   _sWalking: {fileID: 1829385062}
   _sLooking: {fileID: 1829385060}
   _sJumping: {fileID: 1829385061}
+  _sRotateMode: {fileID: 0}
+  _sGrab: {fileID: 0}
+  _isLooking: 0
+  _isRotating: 0
+  _canGrab: 0
 --- !u!114 &1829385060
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4779,6 +4784,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   jumpForce: 5
+  _objectsName: []
   _audioSource: {fileID: 0}
   _groundClip: {fileID: 0}
   _blockClip: {fileID: 0}
@@ -5516,27 +5522,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2332138275407770055, guid: b7295427039485a4bba03fb80525020d, type: 3}
       propertyPath: m_LocalScale.x
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2332138275407770055, guid: b7295427039485a4bba03fb80525020d, type: 3}
       propertyPath: m_LocalScale.y
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2332138275407770055, guid: b7295427039485a4bba03fb80525020d, type: 3}
       propertyPath: m_LocalScale.z
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2332138275407770055, guid: b7295427039485a4bba03fb80525020d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.8
+      value: 5.47
       objectReference: {fileID: 0}
     - target: {fileID: 2332138275407770055, guid: b7295427039485a4bba03fb80525020d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.09
+      value: 1.25
       objectReference: {fileID: 0}
     - target: {fileID: 2332138275407770055, guid: b7295427039485a4bba03fb80525020d, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.18
+      value: -2.07
       objectReference: {fileID: 0}
     - target: {fileID: 2332138275407770055, guid: b7295427039485a4bba03fb80525020d, type: 3}
       propertyPath: m_LocalRotation.w

@@ -23,17 +23,17 @@ public class ObjectSounds : MonoBehaviour
         if (scaleOfObject <= 1000)
         {
             _fallingSound = smallAudio;
-            Debug.Log("Small");
+            //Debug.Log("Small");
         }
         else if(scaleOfObject <= 8000)
         {
             _fallingSound = mediumAudio;
-            Debug.Log("medium");
+            //Debug.Log("medium");
         }
         else 
         {
             _fallingSound = bigAudio;
-            Debug.Log("Big");
+            //Debug.Log("Big");
         }
     }
 
