@@ -27,10 +27,12 @@ public class NewPersTransform : MonoBehaviour
     [SerializeField] private float originalDistance;
     [SerializeField] private float scaleModifier;
 
+    [SerializeField] private float shortestDistance;
+
     private RaycastHit boxHit;
     private RaycastHit[] boxHits;
 
-    private Collider[] newBoxHits;
+    private Collider[] overlapHits;
 
     [SerializeField] private Vector3 originalBoxCastPos;
     [SerializeField] private Vector3 newBoxCastPos;
@@ -54,7 +56,7 @@ public class NewPersTransform : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out collisionHit, 1000)) // Check for collision in level
         {
-            //Debug.DrawLine(this.gameObject.transform.position, collisionHit.point, Color.blue);
+           Debug.DrawLine(this.gameObject.transform.position, collisionHit.point, Color.blue);
         }
 
         switch (currentState)
@@ -75,10 +77,11 @@ public class NewPersTransform : MonoBehaviour
             case States.InitialiseState:
                 /// Initialise Begin
                 // Get original data
-                originalPosition = selectedRigidBody.worldCenterOfMass;
+                originalPosition = selectedObject.transform.position;
                 originalRotation = selectedObject.transform.rotation;
                 originalScale = selectedObject.transform.localScale;
                 originalDistance = Vector3.Distance(transform.position, originalPosition);
+                //originalDistance = hitData.distance;
                 // !Get original data
 
                 // Rigidbody setup
@@ -91,6 +94,16 @@ public class NewPersTransform : MonoBehaviour
                 /// Initialise End
                 currentState = States.GrabbedState;
                 break;
+            case States.InitialiseTwoState:
+                if (originalScale.z >= 2)
+                {
+                    
+                }
+                else
+                {
+                    currentState = States.GrabbedState;
+                }
+                break;
             case States.GrabbedState:
                 /// Grabbed Begin
                 collisionDetected = true;
@@ -101,14 +114,15 @@ public class NewPersTransform : MonoBehaviour
                 originalBoxCastPos = transform.position;
                 for (int i = 0; i < 10; i++)
                 {
-                    newBoxCastPos = Vector3.MoveTowards(originalBoxCastPos, originalBoxCastPos + transform.forward * incrementDistance, incrementDistance); // Calculate optimal position
                     if (i < 10)
                     {
-                        boxHits = Physics.BoxCastAll(originalBoxCastPos, selectedObject.transform.localScale / 2, transform.forward, selectedObject.transform.rotation, incrementDistance);
-                        float shortestDistance = Vector3.Distance(originalBoxCastPos, newBoxCastPos); ; // Max short distance
+                        newBoxCastPos = Vector3.MoveTowards(originalBoxCastPos, originalBoxCastPos + transform.forward * incrementDistance, incrementDistance); // Calculate optimal position
+                        boxHits = Physics.BoxCastAll(originalBoxCastPos, (originalScale * scaleModifier)/2, transform.forward, selectedObject.transform.rotation, incrementDistance);
+                        shortestDistance = Vector3.Distance(originalBoxCastPos, newBoxCastPos); ; // Max short distance
                         for (int y = 0; y < boxHits.Length; y++) // Get minimal distance in array
                         {
-                            if (shortestDistance > boxHits[y].distance)
+                            Debug.Log(boxHits[y].transform.name);
+                            if (shortestDistance > boxHits[y].distance && boxHits[y].transform.tag != "Player")
                             {
                                 shortestDistance = boxHits[y].distance;
                             }
@@ -144,6 +158,7 @@ public class NewPersTransform : MonoBehaviour
     {
         SelectionState,
         InitialiseState,
+        InitialiseTwoState,
         GrabbedState,
         DropState
     }
@@ -158,7 +173,7 @@ public class NewPersTransform : MonoBehaviour
             //Draw a Ray forward from GameObject toward the hit
             //Gizmos.DrawRay(transform.position, transform.forward * boxHit.distance);
             //Draw a cube that extends to where the hit exists
-            Gizmos.DrawWireCube(selectedObject.transform.position, selectedObject.transform.localScale);
+            Gizmos.DrawWireCube(selectedObject.transform.position, originalScale * scaleModifier);
             //Gizmos.DrawMesh(selectedObject.GetComponent<Mesh>(), transform.position + transform.forward * boxHit.distance, selectedParent.transform.rotation, selectedParent.transform.localScale);
         }
     }
