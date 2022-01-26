@@ -97,7 +97,7 @@ public class PerspectiveTransform : MonoBehaviour
                 newScaleModifier = oldSelectionDistance / selectionDistance;
                 scaleModifier = newDistance / originalDistance;
                 selectedParent.transform.localScale = (originalScale * scaleModifier) * newScaleModifier;
-                selectedObject.transform.rotation = new Quaternion(0,0,0,1); // Pickup system remove/change
+                //selectedObject.transform.rotation = new Quaternion(0,0,0,1); // Pickup system remove/change
                 mouseWorldPoint = hitData.transform.position;
                 collisionDetected = Physics.BoxCast(selectedParent.GetComponent<Collider>().bounds.center, selectedParent.transform.localScale/2, transform.forward, out boxHit, transform.rotation = Quaternion.identity, newDistance);
                 if (collisionDetected)
@@ -118,7 +118,7 @@ public class PerspectiveTransform : MonoBehaviour
                 selectedObject.layer = 0;
                 selectedObject.transform.parent = transform.parent;  // Pickup system
                 selectedObject.transform.position = mouseWorldPoint;
-                selectedObject.transform.rotation = new Quaternion(0, 0, 0, 1); // Pickup system remove/change
+                //selectedObject.transform.rotation = new Quaternion(0, 0, 0, 1); // Pickup system remove/change
                 selectedRigidBody.isKinematic = false;
                 selectedRigidBody.useGravity = true;
                 /// Initialise End

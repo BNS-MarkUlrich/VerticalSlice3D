@@ -73,6 +73,14 @@ public class @FPControl : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""rotatemouse"",
+                    ""type"": ""Value"",
+                    ""id"": ""8445b964-b813-4684-9b28-511766756f90"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -278,7 +286,7 @@ public class @FPControl : IInputActionCollection, IDisposable
                     ""name"": """",
                     ""id"": ""2b384e42-cfd1-4936-8b78-61d43174079a"",
                     ""path"": ""<Mouse>/rightButton"",
-                    ""interactions"": """",
+                    ""interactions"": ""Hold"",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Rotate Mode"",
@@ -372,6 +380,17 @@ public class @FPControl : IInputActionCollection, IDisposable
                     ""action"": ""Reset Clone"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""52ae6067-2188-40b4-9fce-3e5af0fadab2"",
+                    ""path"": ""<Mouse>/delta"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""rotatemouse"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -387,6 +406,7 @@ public class @FPControl : IInputActionCollection, IDisposable
         m_PlayerInput_RotateMode = m_PlayerInput.FindAction("Rotate Mode", throwIfNotFound: true);
         m_PlayerInput_ResetClone = m_PlayerInput.FindAction("Reset Clone", throwIfNotFound: true);
         m_PlayerInput_RestartChallenge = m_PlayerInput.FindAction("Restart Challenge", throwIfNotFound: true);
+        m_PlayerInput_rotatemouse = m_PlayerInput.FindAction("rotatemouse", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -443,6 +463,7 @@ public class @FPControl : IInputActionCollection, IDisposable
     private readonly InputAction m_PlayerInput_RotateMode;
     private readonly InputAction m_PlayerInput_ResetClone;
     private readonly InputAction m_PlayerInput_RestartChallenge;
+    private readonly InputAction m_PlayerInput_rotatemouse;
     public struct PlayerInputActions
     {
         private @FPControl m_Wrapper;
@@ -454,6 +475,7 @@ public class @FPControl : IInputActionCollection, IDisposable
         public InputAction @RotateMode => m_Wrapper.m_PlayerInput_RotateMode;
         public InputAction @ResetClone => m_Wrapper.m_PlayerInput_ResetClone;
         public InputAction @RestartChallenge => m_Wrapper.m_PlayerInput_RestartChallenge;
+        public InputAction @rotatemouse => m_Wrapper.m_PlayerInput_rotatemouse;
         public InputActionMap Get() { return m_Wrapper.m_PlayerInput; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -484,6 +506,9 @@ public class @FPControl : IInputActionCollection, IDisposable
                 @RestartChallenge.started -= m_Wrapper.m_PlayerInputActionsCallbackInterface.OnRestartChallenge;
                 @RestartChallenge.performed -= m_Wrapper.m_PlayerInputActionsCallbackInterface.OnRestartChallenge;
                 @RestartChallenge.canceled -= m_Wrapper.m_PlayerInputActionsCallbackInterface.OnRestartChallenge;
+                @rotatemouse.started -= m_Wrapper.m_PlayerInputActionsCallbackInterface.OnRotatemouse;
+                @rotatemouse.performed -= m_Wrapper.m_PlayerInputActionsCallbackInterface.OnRotatemouse;
+                @rotatemouse.canceled -= m_Wrapper.m_PlayerInputActionsCallbackInterface.OnRotatemouse;
             }
             m_Wrapper.m_PlayerInputActionsCallbackInterface = instance;
             if (instance != null)
@@ -509,6 +534,9 @@ public class @FPControl : IInputActionCollection, IDisposable
                 @RestartChallenge.started += instance.OnRestartChallenge;
                 @RestartChallenge.performed += instance.OnRestartChallenge;
                 @RestartChallenge.canceled += instance.OnRestartChallenge;
+                @rotatemouse.started += instance.OnRotatemouse;
+                @rotatemouse.performed += instance.OnRotatemouse;
+                @rotatemouse.canceled += instance.OnRotatemouse;
             }
         }
     }
@@ -522,5 +550,6 @@ public class @FPControl : IInputActionCollection, IDisposable
         void OnRotateMode(InputAction.CallbackContext context);
         void OnResetClone(InputAction.CallbackContext context);
         void OnRestartChallenge(InputAction.CallbackContext context);
+        void OnRotatemouse(InputAction.CallbackContext context);
     }
 }

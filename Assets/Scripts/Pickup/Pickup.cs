@@ -2,11 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Pickup : MonoBehaviour
 {
     // Remove [SerializeField] later
-    [Header("Selected Object")]
+    [Header("Selected Object")] 
     [SerializeField] public GameObject selectedObject; // Pickup system
     [SerializeField] private Rigidbody selectedRigidBody;
     [SerializeField] private GameObject selectedParent; // Pickup system
@@ -15,8 +16,10 @@ public class Pickup : MonoBehaviour
     [SerializeField] private Vector3 selectedParentOriginalPosition;
     private float number;
     public bool collisionDetected;
-    private Vector3 lastMousePosition;
-    private PlaceHolderCameraController camerscript;
+    private Camera MainCamera;
+    [SerializeField] private Quaternion lastCameraPosition;
+    private Quaternion newCameraPosition;
+    
     [Header("Mouse Position")]
     [SerializeField] private Vector3 mouseWorldPoint;
     [SerializeField] private float moveForce = 250;
@@ -30,10 +33,23 @@ public class Pickup : MonoBehaviour
     [SerializeField] private States currentState = States.SelectionState;
     [SerializeField] private ScalingModes currentMode = ScalingModes.Legacy;
 
+
+    private FPControl _controls;
+    private FPControl.PlayerInputActions _inputControls;
+
+    private InputParse inputParse;
+
+    private float sensX;
+    private float rotX;
+
     private void Start()
     {
-        camerscript = GetComponent<PlaceHolderCameraController>();
+        inputParse = FindObjectOfType<InputParse>();
+        MainCamera = Camera.main;
+        sensX = 3;
         number = 2;
+        _controls = new FPControl();
+        _inputControls = _controls.PlayerInput;
         selectedParent = new GameObject("SelectedObject Handler"); // Pickup system
         selectedParent.transform.parent = Camera.main.transform; // Pickup system
         selectedParent.transform.localPosition = new Vector3(0, 0, 3); // Pickup system
@@ -41,8 +57,22 @@ public class Pickup : MonoBehaviour
         selectedParent.transform.localRotation = new Quaternion(0, 0, 0, 0); // Pickup system
     }
 
+    public void HoldRotate(InputAction.CallbackContext context)
+    {
+        inputParse._isLooking = false;
+        inputParse._isRotating = true;
+    }
+    public void Rotating(Vector2 pos)
+    {
+        Debug.Log("m2");
+        rotX += pos.x * sensX;
+        selectedObject.transform.Rotate(0, -pos.x, 0);
+        Debug.Log(pos.x);
+    }
     private void Update()
     {
+
+        
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hitData;
         LayerMask mask = LayerMask.GetMask("Default");
@@ -88,7 +118,7 @@ public class Pickup : MonoBehaviour
                 selectedRigidBody.isKinematic = false;
                 selectedRigidBody.useGravity = true;
                 selectedObject.transform.parent = selectedParent.transform;  // Pickup system
-                selectedRigidBody.freezeRotation = true;
+                //selectedRigidBody.freezeRotation = true;
                 number = 2;
                 /// Initialise End
                 currentState = States.GrabbedState;
@@ -103,26 +133,6 @@ public class Pickup : MonoBehaviour
                     number -= Time.deltaTime;
                     Quaternion rotate = Quaternion.Euler(transform.rotation.eulerAngles.z, transform.rotation.eulerAngles.y, 0);
                     selectedObject.transform.rotation = Quaternion.Lerp(selectedObject.transform.rotation, rotate, 6 * Time.deltaTime);
-                }
-                // is to rotate when pressing right mouse button
-
-                if (Input.GetKey(KeyCode.Mouse1) && mouseWorldPoint.x < originalPosition.x)
-                {
-                    selectedObject.transform.Rotate(0, 1 * Time.deltaTime, 1);
-                    Debug.Log("m2");
-                    lastMousePosition = originalPosition;
-                    camerscript.enabled = false;
-                }
-                else if (Input.GetKey(KeyCode.Mouse1) && lastMousePosition.x > originalPosition.x)
-                {
-                    selectedObject.transform.Rotate(0, 10 * Time.deltaTime, -1);
-                    Debug.Log("m2");
-                    lastMousePosition = originalPosition;
-                    camerscript.enabled = false;
-                }
-                else 
-                {
-                    camerscript.enabled = true;
                 }
                 if (mouseWorldPoint.y < selectedObject.transform.localScale.y / 2)
                 {
@@ -174,10 +184,27 @@ public class Pickup : MonoBehaviour
                     currentState = States.SelectionState;
                 }
                 break;
+            case States.DropState:
+                /// Initialise Begin
+                inputParse._isLooking = true;
+                inputParse._isRotating = false;
+                collisionDetected = false;
+                selectedRigidBody.GetComponent<Collider>().isTrigger = false;
+                selectedObject.layer = 0;
+                selectedObject.transform.parent = transform.parent;  // Pickup system
+                selectedObject.transform.position = mouseWorldPoint;
+                //selectedObject.transform.rotation = new Quaternion(0, 0, 0, 1); // Pickup system remove/change
+                selectedRigidBody.isKinematic = false;
+                selectedRigidBody.useGravity = true;
+                /// Initialise End
+                currentState = States.SelectionState;
+                break;
             default:
                 break;
         }
+
     }
+    
 
     private enum ScalingModes
     {
@@ -189,10 +216,7 @@ public class Pickup : MonoBehaviour
     {
         SelectionState,
         InitialiseState,
-        GrabbedState
-    }
-    private void rotate()
-    {
-        
+        GrabbedState,
+        DropState
     }
 }
