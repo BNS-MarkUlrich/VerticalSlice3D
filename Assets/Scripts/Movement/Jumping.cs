@@ -49,35 +49,35 @@ public class Jumping : MonoBehaviour
             for (int i = 0; i < _objectsName.Length; i++)
             {
                 // Ground--------------------------------------------------
-                if (collision.gameObject.name == "Ground" || collision.gameObject.name == "Ground (" + i + ")")
+                if (collision.gameObject.name == "Floor PlaceHolder" || collision.gameObject.name == "Floor PlaceHolder (" + i + ")")
                 {
                     _audioSource.PlayOneShot(_groundClip, 1);
                     Debug.Log("ground");
                     i = _objectsName.Length;
                 }
                 // Block---------------------------------------------------
-                else if (collision.gameObject.name == "Cube" || collision.gameObject.name == "Cube (" + i + ")")
+                else if (collision.gameObject.tag == "SelectableBlock")
                 {
                     Debug.Log("Block");
                     _audioSource.PlayOneShot(_blockClip, 1);
                     i = _objectsName.Length;
                 }
                 //Pion-----------------------------------------------------
-                else if (collision.gameObject.name == "Pion" || collision.gameObject.name == "Pion (" + i + ")")
+                else if (collision.gameObject.tag == "SelectablePion")
                 {
                     _audioSource.PlayOneShot(_pionClip, 1);
                     Debug.Log("Pion");
                     i = _objectsName.Length;
                 }
                 //Checkerboard---------------------------------------------
-                else if (collision.gameObject.name == "Checkerboard" || collision.gameObject.name == "Checkerboard (" + i + ")")
+                else if (collision.gameObject.tag == "SelectableCB")
                 {
                     Debug.Log("CB");
                     _audioSource.PlayOneShot(_checkerboardClip, 1);
                     i = _objectsName.Length;
                 }
                 //Box------------------------------------------------------
-                else if (collision.gameObject.name == "Box" || collision.gameObject.name == "Box (" + i + ")")
+                else if (collision.gameObject.tag == "SelectableBox")
                 {
                     Debug.Log("Box");
                     _audioSource.PlayOneShot(_boxClip, 1);
