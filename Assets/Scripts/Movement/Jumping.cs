@@ -83,6 +83,11 @@ public class Jumping : MonoBehaviour
                     _audioSource.PlayOneShot(_boxClip, 1);
                     i = _objectsName.Length;
                 }
+                else if (collision.gameObject.name == "Table" ||  collision.gameObject.name == "Table (" + i + ")")
+                {
+                    _audioSource.PlayOneShot(_boxClip, 1);
+                    i = _objectsName.Length;
+                }
 
 
             }       
