@@ -6,14 +6,14 @@ public class NewPersTransform : MonoBehaviour
 {
     // Remove [SerializeField] later
     [Header("Selected Object")]
-    [SerializeField] public GameObject selectedObject; // Pickup system
-    [SerializeField] protected Rigidbody selectedRigidBody;
-    [SerializeField] protected GameObject selectedParent; // Pickup system
-    [SerializeField] protected LayerMask selectableLayer;
+    public GameObject selectedObject; // Pickup system
+    protected Rigidbody selectedRigidBody;
+    protected GameObject selectedParent; // Pickup system
+    protected LayerMask selectableLayer;
 
-    [SerializeField] protected Vector3 originalPosition;
-    [SerializeField] protected Quaternion originalRotation;
-    [SerializeField] protected Vector3 originalScale;
+    protected Vector3 originalPosition;
+    protected Quaternion originalRotation;
+    protected Vector3 originalScale;
 
     public bool collisionDetected;
 
@@ -22,33 +22,29 @@ public class NewPersTransform : MonoBehaviour
     protected RaycastHit hitData;
 
     [Header("Scale & Distance")]
-    [SerializeField] protected float incrementDistance;
-    [SerializeField] protected float newDistance;
-    [SerializeField] protected float originalDistance;
-    [SerializeField] protected float scaleModifier;
+    protected float incrementDistance;
+    [SerializeField] protected float incrementAmount = 10;
+    protected float newDistance;
+    protected float originalDistance;
+    protected float scaleModifier;
 
-    [SerializeField] protected float shortestDistance;
+    protected float shortestDistance;
 
-    protected RaycastHit boxHit;
     protected RaycastHit[] boxHits;
-
-
-    protected Collider[] overlapHits;
-
-    [SerializeField] protected Vector3 originalBoxCastPos;
-    [SerializeField] protected Vector3 newBoxCastPos;
-
-    private Vector3 shrinkScale = new Vector3(0.1f, 0.1f, 0.1f);
-    private Vector3 selectedObjectScale;
+    protected Vector3 originalBoxCastPos;
+    protected Vector3 newBoxCastPos;
 
     [Header("Bools")]
-    [SerializeField] public bool selection;
-    [SerializeField] public bool initialise;
-    [SerializeField] public bool grabbed;
-    [SerializeField] public bool dropped;
+    public bool selection;
+    public bool initialise;
+    public bool grabbed;
+    public bool dropped;
+
+    [Header("Pick Up System")]
+    public Pickup pickupSystem;
 
     [Header("Switch Cases")]
-    [SerializeField] public States currentState = States.SelectionState;
+    public States currentState = States.SelectionState;
 
     private void Start()
     {
@@ -60,6 +56,8 @@ public class NewPersTransform : MonoBehaviour
         selectedParent.transform.parent = Camera.main.transform; // Pickup system
         selectedParent.transform.localPosition = new Vector3(0, 0, 0); // Pickup system
         selectedParent.transform.localRotation = new Quaternion(0, 0, 0, 0); // Pickup system
+
+        pickupSystem = FindObjectOfType<Pickup>();
     }
 
 
@@ -78,7 +76,7 @@ public class NewPersTransform : MonoBehaviour
                 grabbed = false;
                 dropped = false;
                 scaleModifier = 1; // Reset scale modifier
-                if (Input.GetMouseButtonDown(0)) // Must select object to begin.
+                if (pickupSystem.grab) // Must select object to begin.
                 {
                     if (Physics.Raycast(ray, out hitData, 1000) && hitData.transform.tag == "SelectableBox" || hitData.transform.tag == "SelectableBlock" || hitData.transform.tag == "SelectablePion" || hitData.transform.tag == "SelectableCB") // Check for selectables
                     {
@@ -123,11 +121,11 @@ public class NewPersTransform : MonoBehaviour
                 newDistance = Vector3.Distance(transform.position, selectedObject.transform.position);
                 scaleModifier = newDistance / originalDistance;
                 //selectedObject.transform.localScale = originalScale * scaleModifier; // Set scale
-                incrementDistance = collisionHit.distance / 10;
+                incrementDistance = collisionHit.distance / incrementAmount;
                 originalBoxCastPos = transform.position;
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < incrementAmount; i++)
                 {
-                    if (i < 10)
+                    if (i < incrementAmount)
                     {
                         newBoxCastPos = Vector3.MoveTowards(originalBoxCastPos, originalBoxCastPos + transform.forward * incrementDistance, incrementDistance); // Calculate optimal position
                         if (selectedObject.tag == "SelectableBox" || selectedObject.tag == "SelectableBlock")
@@ -165,7 +163,7 @@ public class NewPersTransform : MonoBehaviour
                     }
                     originalBoxCastPos = selectedObject.transform.position;
                 }
-                if (Input.GetMouseButtonDown(0)) // Click to let go of object
+                if (pickupSystem.grab) // Click to let go of object
                 {
                     currentState = States.DropState;
                 }
@@ -205,18 +203,6 @@ public class NewPersTransform : MonoBehaviour
         InitialiseState,
         GrabbedState,
         DropState
-    }
-    private IEnumerator shrink()
-    {
-        selectedObjectScale = selectedObject.transform.localScale;
-        Debug.Log("go1");
-        yield return new WaitForEndOfFrame();
-        Debug.Log("go2");
-        selectedObjectScale -= shrinkScale;
-        yield return new WaitForEndOfFrame();
-        selectedObject.transform.localScale = selectedObjectScale;
-        Debug.Log(selectedObject.transform.localScale);
-        Debug.Log("go3");
     }
 
     //Draw the BoxCast as a gizmo to show where it currently is testing. Click the Gizmos button to see this
