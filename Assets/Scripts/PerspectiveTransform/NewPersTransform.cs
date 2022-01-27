@@ -38,6 +38,9 @@ public class NewPersTransform : MonoBehaviour
     [SerializeField] protected Vector3 originalBoxCastPos;
     [SerializeField] protected Vector3 newBoxCastPos;
 
+    private Vector3 shrinkScale = new Vector3(0.1f, 0.1f, 0.1f);
+    private Vector3 selectedObjectScale;
+
     [Header("Bools")]
     [SerializeField] public bool selection;
     [SerializeField] public bool initialise;
@@ -49,6 +52,7 @@ public class NewPersTransform : MonoBehaviour
 
     private void Start()
     {
+
         selectedParent = new GameObject("SelectedObject Handler"); // Pickup system
         selectedParent.AddComponent<BoxCollider>();
         selectedParent.GetComponent<Collider>().isTrigger = true;
@@ -57,6 +61,7 @@ public class NewPersTransform : MonoBehaviour
         selectedParent.transform.localPosition = new Vector3(0, 0, 0); // Pickup system
         selectedParent.transform.localRotation = new Quaternion(0, 0, 0, 0); // Pickup system
     }
+
 
     private void Update()
     {
@@ -117,7 +122,7 @@ public class NewPersTransform : MonoBehaviour
                 collisionDetected = true;
                 newDistance = Vector3.Distance(transform.position, selectedObject.transform.position);
                 scaleModifier = newDistance / originalDistance;
-                selectedObject.transform.localScale = originalScale * scaleModifier; // Set scale
+                //selectedObject.transform.localScale = originalScale * scaleModifier; // Set scale
                 incrementDistance = collisionHit.distance / 10;
                 originalBoxCastPos = transform.position;
                 for (int i = 0; i < 10; i++)
@@ -140,6 +145,15 @@ public class NewPersTransform : MonoBehaviour
                         for (int y = 0; y < boxHits.Length; y++) // Get minimal distance in array
                         {
                             Debug.DrawLine(transform.position, boxHits[y].point);
+                            if (boxHits[y].transform.tag == "Player")
+                            {
+                                //Debug.Log(boxHits[y].transform.name);
+                                selectedObject.transform.position = Vector3.MoveTowards(originalBoxCastPos, originalBoxCastPos + transform.forward * shortestDistance, shortestDistance); // Calculate optimal position
+                            }
+                            else 
+                            {
+                                selectedObject.transform.localScale = originalScale * scaleModifier; // Set scale
+                            }
                             //Debug.Log(boxHits[y].transform.name);
                             if (shortestDistance > boxHits[y].distance && boxHits[y].transform.tag != "Player")
                             {
@@ -191,6 +205,18 @@ public class NewPersTransform : MonoBehaviour
         InitialiseState,
         GrabbedState,
         DropState
+    }
+    private IEnumerator shrink()
+    {
+        selectedObjectScale = selectedObject.transform.localScale;
+        Debug.Log("go1");
+        yield return new WaitForEndOfFrame();
+        Debug.Log("go2");
+        selectedObjectScale -= shrinkScale;
+        yield return new WaitForEndOfFrame();
+        selectedObject.transform.localScale = selectedObjectScale;
+        Debug.Log(selectedObject.transform.localScale);
+        Debug.Log("go3");
     }
 
     //Draw the BoxCast as a gizmo to show where it currently is testing. Click the Gizmos button to see this
