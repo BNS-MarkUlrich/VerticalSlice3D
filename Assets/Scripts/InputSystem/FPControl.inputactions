@@ -60,6 +60,14 @@
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
+                },
+                {
+                    "name": "rotatemouse",
+                    "type": "Value",
+                    "id": "8445b964-b813-4684-9b28-511766756f90",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": ""
                 }
             ],
             "bindings": [
@@ -357,6 +365,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Reset Clone",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "52ae6067-2188-40b4-9fce-3e5af0fadab2",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "rotatemouse",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -23,23 +23,23 @@ public class ObjectSounds : MonoBehaviour
         if (scaleOfObject <= 1000)
         {
             _fallingSound = smallAudio;
-            Debug.Log("Small");
+            //Debug.Log("Small");
         }
         else if(scaleOfObject <= 8000)
         {
             _fallingSound = mediumAudio;
-            Debug.Log("medium");
+            //Debug.Log("medium");
         }
         else 
         {
             _fallingSound = bigAudio;
-            Debug.Log("Big");
+            //Debug.Log("Big");
         }
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if(collision.relativeVelocity.magnitude > 1)
+        if(collision.relativeVelocity.magnitude > 1 && collision.gameObject.tag != "Player")
         {
             _audioSource.PlayOneShot(_fallingSound);
         }
