@@ -7,9 +7,6 @@ public class Jumping : MonoBehaviour
 {
     private Rigidbody thisRigidbody;
     [SerializeField] private float jumpForce;
-    [Header("All objects")]
-    [SerializeField] private GameObject[] _objectsName;
-    [Header("Audio")]
     [SerializeField] private AudioSource _audioSource;
     [SerializeField] private AudioClip _groundClip;
     [SerializeField] private AudioClip _blockClip;
@@ -21,7 +18,6 @@ public class Jumping : MonoBehaviour
     private void Start()
     {
         thisRigidbody = this.gameObject.GetComponent<Rigidbody>();
-        //Audio--------------------------------------------------------------------------------
         _audioSource = FindObjectOfType<AudioSource>();
         _groundClip = Resources.Load<AudioClip>("Music/Player/LandingImpactGround");
         _blockClip = Resources.Load<AudioClip>("Music/Player/LandingImpactBlocks");
@@ -29,8 +25,6 @@ public class Jumping : MonoBehaviour
         _checkerboardClip = Resources.Load<AudioClip>("Music/Player/LandingImpactCheckerBoard");
         _boxClip = Resources.Load<AudioClip>("Music/Player/LandingImpactBox");
         _jumpUPClip = Resources.Load<AudioClip>("Music/Player/JumpUP");
-        //Find all Objects---------------------------------------------------------------------
-        _objectsName = (GameObject[])Object.FindObjectsOfType(typeof(GameObject));
     }
 
     public void Jump(InputAction.CallbackContext context)
@@ -46,7 +40,7 @@ public class Jumping : MonoBehaviour
     {
         if (collision.relativeVelocity.magnitude > 1)
         {
-            for (int i = 0; i < _objectsName.Length; i++)
+            if (collision.gameObject.name == "Ground")
             {
                 // Ground--------------------------------------------------
                 if (collision.gameObject.name == "Floor PlaceHolder" || collision.gameObject.name == "Floor PlaceHolder (" + i + ")")
@@ -90,7 +84,7 @@ public class Jumping : MonoBehaviour
                 }
 
 
-            }       
+           
         }
     }
 }
