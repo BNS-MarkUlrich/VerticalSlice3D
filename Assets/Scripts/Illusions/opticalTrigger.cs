@@ -6,7 +6,13 @@ public class opticalTrigger : MonoBehaviour
 {
     private GameObject playerCamera;
     [SerializeField] private GameObject illusionSpawn;
+    [SerializeField] private GameObject projectionObject;
     [SerializeField] private Transform spawnPoint;
+
+    private void Start()
+    {
+        projectionObject = GameObject.Find("ProjectionBox");
+    }
 
     private void OnTriggerStay(Collider col)
     {
@@ -18,6 +24,7 @@ public class opticalTrigger : MonoBehaviour
             {
                 Debug.Log("Trigger");
                 Instantiate(illusionSpawn, spawnPoint.position, spawnPoint.rotation);
+                Destroy(projectionObject);
                 this.transform.parent.gameObject.SetActive(false);
             }
         }
