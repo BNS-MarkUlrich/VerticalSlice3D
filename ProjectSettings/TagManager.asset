@@ -6,6 +6,10 @@ TagManager:
   tags:
   - Selectable
   - NoMoveThrough
+  - SelectableBox
+  - SelectablePion
+  - SelectableCB
+  - SelectableBlock
   layers:
   - Default
   - TransparentFX

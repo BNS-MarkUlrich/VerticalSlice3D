@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 3944611646298685656}
   - component: {fileID: 77063609620860797}
   - component: {fileID: 2807220003292543927}
-  - component: {fileID: 3545645834961807167}
   - component: {fileID: 3545645834961807166}
   - component: {fileID: 3545645834961807153}
+  - component: {fileID: 4991178106555974333}
   m_Layer: 3
   m_Name: king
   m_TagString: Selectable
@@ -84,19 +84,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &3545645834961807167
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4464689869506009698}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1.8903044, y: 5.178791, z: 1.8903047}
-  m_Center: {x: 0.015256524, y: -0.4726013, z: 0.014975488}
 --- !u!54 &3545645834961807166
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -125,3 +112,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8352e67b4f22d964f94a3f21aecbe5c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!136 &4991178106555974333
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4464689869506009698}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 1.1369331
+  m_Height: 5.7607265
+  m_Direction: 1
+  m_Center: {x: 0.015256524, y: -0.599797, z: 0.039209604}

@@ -42,24 +42,47 @@ public class Jumping : MonoBehaviour
         {
             if (collision.gameObject.name == "Ground")
             {
-                _audioSource.PlayOneShot(_groundClip, 1);
-            }
-            else if(collision.gameObject.name == "Cube")
-            {
-                _audioSource.PlayOneShot(_blockClip, 1);
-            }
-            else if(collision.gameObject.name == "Pion")
-            {
-                _audioSource.PlayOneShot(_pionClip, 1);
-            }
-            else if(collision.gameObject.name == "Checkerboard")
-            {
-                _audioSource.PlayOneShot(_checkerboardClip, 1);
-            }
-            else if(collision.gameObject.name == "Box")
-            {
-                _audioSource.PlayOneShot(_boxClip, 1);
-            }
+                // Ground--------------------------------------------------
+                if (collision.gameObject.name == "Floor PlaceHolder" || collision.gameObject.name == "Floor PlaceHolder (" + i + ")")
+                {
+                    _audioSource.PlayOneShot(_groundClip, 1);
+                    Debug.Log("ground");
+                    i = _objectsName.Length;
+                }
+                // Block---------------------------------------------------
+                else if (collision.gameObject.tag == "SelectableBlock")
+                {
+                    Debug.Log("Block");
+                    _audioSource.PlayOneShot(_blockClip, 1);
+                    i = _objectsName.Length;
+                }
+                //Pion-----------------------------------------------------
+                else if (collision.gameObject.tag == "SelectablePion")
+                {
+                    _audioSource.PlayOneShot(_pionClip, 1);
+                    Debug.Log("Pion");
+                    i = _objectsName.Length;
+                }
+                //Checkerboard---------------------------------------------
+                else if (collision.gameObject.tag == "SelectableCB")
+                {
+                    Debug.Log("CB");
+                    _audioSource.PlayOneShot(_checkerboardClip, 1);
+                    i = _objectsName.Length;
+                }
+                //Box------------------------------------------------------
+                else if (collision.gameObject.tag == "SelectableBox")
+                {
+                    Debug.Log("Box");
+                    _audioSource.PlayOneShot(_boxClip, 1);
+                    i = _objectsName.Length;
+                }
+                else if (collision.gameObject.name == "Table" ||  collision.gameObject.name == "Table (" + i + ")")
+                {
+                    _audioSource.PlayOneShot(_boxClip, 1);
+                    i = _objectsName.Length;
+                }
+
 
            
         }

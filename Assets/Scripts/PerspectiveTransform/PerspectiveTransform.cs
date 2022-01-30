@@ -33,6 +33,9 @@ public class PerspectiveTransform : MonoBehaviour
 
     [SerializeField] private RaycastHit sweepTestData;
 
+    private Vector3 maxScale = new Vector3(5,5,5);
+    private Vector3 lastScale = new Vector3(4.9f, 4.9f, 4.9f);
+
     [Header("Switch Cases")]
     [SerializeField] private States currentState = States.SelectionState;
 
@@ -49,8 +52,12 @@ public class PerspectiveTransform : MonoBehaviour
 
     private void Update()
     {
+        Debug.Log(selectedObject.transform.localScale.x);
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
+        if (selectedObject.transform.localScale.x >= 5f)
+        {
+            Debug.Log("resice");
+        }
         /// Call Selection/Pickup System here
         if (Physics.Raycast(ray, out collisionHit, 1000))
         {
