@@ -22,7 +22,7 @@ public class opticalTrigger : MonoBehaviour
         {
             if(playerCamera.transform.eulerAngles.y <= transform.eulerAngles.y + 3 && playerCamera.transform.eulerAngles.y >= transform.eulerAngles.y - 3 && playerCamera.transform.eulerAngles.x <= transform.eulerAngles.x + 3 && playerCamera.transform.eulerAngles.x >= transform.eulerAngles.x - 3)
             {
-                Debug.Log("Trigger");
+                //Debug.Log("Trigger");
                 Instantiate(illusionSpawn, spawnPoint.position, spawnPoint.rotation);
                 Destroy(projectionObject);
                 this.transform.parent.gameObject.SetActive(false);
